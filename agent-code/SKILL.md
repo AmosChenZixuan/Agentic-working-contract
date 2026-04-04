@@ -25,6 +25,18 @@ If no plan exists (direct invocation), derive your own scope: one coherent behav
 
 ---
 
+## Pre-flight: Check for available skills
+
+Before writing any code, search for skills that might help:
+
+1. List files in `~/.claude/skills/` to see what exists
+2. If a skill seems relevant to this slice (e.g. `systematic-debugging` for a tricky bug, `frontend-ui-ux` for UI work), briefly describe what it offers and ask explicit approval to use it
+3. **Always** ask approval for invoking `subagent-driven-development`
+
+Do not assume a skill is needed. Do not use a skill without asking. If no skills apply, proceed normally.
+
+---
+
 ## Phase 2: Inspect
 
 Read the files you'll change — not just the target, but its callers, imports, and related tests. Understand:
