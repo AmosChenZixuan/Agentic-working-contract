@@ -21,7 +21,14 @@ Start with `/agent-scope` when the requirement is unclear or the approach is und
 ### Other Skills
 
 - **doc-writer** — Writes and edits `README.md`, `CLAUDE.md`, and design documents.
-- **frontend-ui-ux** — Builds production-grade UI with a strong aesthetic point of view.
+- **[frontend-ui-ux](https://github.com/code-yeongyu/oh-my-openagent/blob/dev/src/features/builtin-skills/frontend-ui-ux/SKILL.md)** — Builds production-grade UI with a strong aesthetic point of view.
+- **[ui-ux-pro-max](https://github.com/nextlevelbuilder/ui-ux-pro-max-skill)** — UI/UX design intelligence: 67 styles, 96 palettes, 57 font pairings, 13 tech stacks. Use for landing pages, dashboards, mobile apps, and component-level design decisions.
+
+- [**Superpowers Subset**](https://github.com/obra/superpowers)
+    - **systematic-debugging** — Use when encountering any bug, test failure, or unexpected behavior. Structured root-cause tracing and defense-in-depth.
+    - **subagent-driven-development** — Coordinates multiple agents working on independent tasks in a single session.
+    - **dispatching-parallel-agents** — Launches 2+ agents simultaneously for tasks with no shared state or sequential dependencies.
+    - **using-git-worktrees** — Creates isolated git worktrees for feature work that needs to stay clean of the main workspace.
 
 ## Install
 
