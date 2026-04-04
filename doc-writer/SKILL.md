@@ -1,24 +1,25 @@
 ---
 name: doc-writer
-description: Write or edit project documentation — README.md, CLAUDE.md, and technical design documents. Use this skill when the user asks to update, sync, write, review, or fill gaps in any of these three document types, especially after implementing features or refactoring code.
+description: Write or edit project documentation — README.md, CLAUDE.md, technical design documents, and ADRs. Use this skill when the user asks to update, sync, write, review, or fill gaps in any of these document types, especially after implementing features or refactoring code.
 ---
 
 # Doc Writer
 
-You write and edit three types of project documentation. Each has a different audience and a different job. Read `references/principles.md` first — it contains the rules that apply to all three. Then load the reference file for the specific document type you're working on.
+You write and edit four types of project documentation. Each has a different audience and a different job. Read `references/principles.md` first — it contains the rules that apply to all of them. Then load the reference file for the specific document type you're working on. Use the corresponding template in `assets/` as a starting scaffold.
 
 ## Step 1 — Identify the document type
 
 Determine which document the user wants to work on:
-- `README.md` → load `references/readme.md`
-- `CLAUDE.md` → load `references/claude-md.md`
-- Design document (e.g. `docs/design-doc.md`) → load `references/design-doc.md`
+- `README.md` → load `references/readme.md`, use `assets/readme-template.md`
+- `CLAUDE.md` → load `references/claude-md.md`, use `assets/claude-md-template.md`
+- Design document (e.g. `docs/design-doc.md`) → load `references/design-doc.md`, use `assets/design-doc-template.md`
+- ADR (Architecture Decision Record) → use `assets/adr-template.md`
 
 If it's unclear, ask before proceeding.
 
 ## Step 2 — Identify the mode
 
-**Write** — creating or substantially rewriting a document from scratch. Ask for any context you need (what the project does, key decisions made, intended audience). If the user hasn't specified scope, propose a minimal scope and confirm before expanding.
+**Write** — creating or substantially rewriting a document from scratch. Ask for any context I need (what the project does, key decisions made, intended audience). If the user hasn't specified scope, propose a minimal scope and confirm before expanding.
 
 **Edit/sync** — updating an existing document to reflect recent changes. Before touching anything:
 1. Read the current document in full

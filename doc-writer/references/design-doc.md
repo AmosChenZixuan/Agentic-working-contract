@@ -1,5 +1,7 @@
 # Design Document Rules
 
+**Template:** `assets/design-doc-template.md` — start here for new design docs. Fill in the `{{ placeholders }}` and delete sections that don't apply. For individual Architecture Decisions, use `assets/adr-template.md` instead.
+
 **Audience:** Engineers (human and AI) who need to understand architectural decisions, system contracts, and the reasoning behind non-obvious choices. They already have the code — they're reading this to understand *why*.
 
 ## What belongs

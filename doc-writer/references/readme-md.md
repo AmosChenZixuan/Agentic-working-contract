@@ -1,5 +1,7 @@
 # README.md Rules
 
+**Template:** `assets/readme-template.md` — start here for new READMEs. Fill in the `{{ placeholders }}` and delete sections that don't apply.
+
 **Audience:** Someone who has never seen the project — a new contributor, a future self, or a curious reader. They need orientation, not architecture.
 
 ## What belongs

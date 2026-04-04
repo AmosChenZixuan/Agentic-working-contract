@@ -1,12 +1,14 @@
 # CLAUDE.md Rules
 
+**Template:** `assets/claude-md-template.md` — start here for new CLAUDE.md files. Fill in the `{{ placeholders }}` and delete sections that don't apply.
+
 **Audience:** AI agents working in this repository. They have no memory of prior sessions and need to know how to operate, not what exists.
 
 ## What belongs
 
-- Commands to run the project (dev, test, lint, build)
+- Commands to run the project (dev, test, build)
 - Conventions an agent must follow that aren't obvious from the code (naming, patterns, constraints)
-- Where to look for things — key file paths and what they contain
+- Where to look for things — key *folders* and what they contain
 - Rules that apply to *all* agents working here, regardless of task
 
 ## What doesn't belong
