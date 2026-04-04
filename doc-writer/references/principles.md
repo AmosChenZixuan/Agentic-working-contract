@@ -1,5 +1,16 @@
 # Shared Documentation Principles
 
+## First Principles Thinking
+
+Question every assumption about what belongs in a document:
+
+- **Why does this exist?** A doc exists to transfer knowledge that can't be derived from code. If the "knowledge" is just describing what the code already shows, the doc is noise.
+- **Who is this actually for?** Write to that reader — not to be comprehensive, not to capture everything, but to serve a specific person with a specific gap.
+- **What is the minimum needed?** Resist the urge to document "just in case." More docs = more maintenance burden and more stale content. If something can be learned from the code, don't duplicate it.
+- **Would this survive a "so what?" test?** For each section: if the reader finishes it and doesn't know something that changes their behavior, cut it.
+
+When in doubt, lean toward less. A focused document that gets read beats an exhaustive one that gets ignored.
+
 ## The core test
 
 Before writing anything, ask: *could a reader learn this by reading the code, running git log, or checking the framework docs?* If yes, leave it out. Documentation exists to capture what isn't derivable from the source of truth it describes.

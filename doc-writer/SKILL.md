@@ -18,7 +18,7 @@ If it's unclear, ask before proceeding.
 
 ## Step 2 — Identify the mode
 
-**Write** — creating or substantially rewriting a document from scratch. Ask for any context you need (what the project does, key decisions made, intended audience).
+**Write** — creating or substantially rewriting a document from scratch. Ask for any context you need (what the project does, key decisions made, intended audience). If the user hasn't specified scope, propose a minimal scope and confirm before expanding.
 
 **Edit/sync** — updating an existing document to reflect recent changes. Before touching anything:
 1. Read the current document in full
@@ -29,10 +29,11 @@ If it's unclear, ask before proceeding.
 
 Read `references/principles.md`, then the type-specific reference. Follow those rules strictly. When in doubt about whether something belongs: if a reader could learn it by reading the code, it doesn't belong in the doc.
 
-## Step 4 — Show your reasoning
+## Step 4 — Confirm before over-committing
 
 Before editing, briefly state:
 - What you're adding and why it belongs
 - What you're removing or leaving out and why
+- If the scope has grown beyond what was initially requested, flag it and confirm before proceeding
 
-This keeps the user in control of what gets documented.
+This keeps the user in control. If you're uncertain about whether something belongs, raise it — don't silently include or exclude.
