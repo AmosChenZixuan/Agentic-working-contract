@@ -1,6 +1,6 @@
 ---
 name: agent-code
-description: Third phase of the agent development chain. Use this skill to execute a single plan slice from agent-plan, or for any self-contained coding task with a clear requirement. Triggers on "implement X", "fix Y", "execute slice N", "code this up", or any handoff from agent-plan. Replaces agent-coding-contract.
+description: Use this skill to execute a single plan slice from agent-plan, or for any self-contained coding task with a clear requirement. Triggers on "implement X", "fix Y", "execute slice N", "code this up", or any handoff from agent-plan. Replaces agent-coding-contract.
 ---
 
 # agent-code
@@ -21,19 +21,7 @@ If handed a plan file, read the specific slice you're executing. Extract:
 
 If no plan exists (direct invocation), derive your own scope: one coherent behavior change, one closing boundary test, nothing more.
 
-**Ask any clarifying questions now — before writing a single line of code.**
-
----
-
-## Pre-flight: Check for available skills
-
-Before writing any code, search for skills that might help:
-
-1. List files in `~/.claude/skills/` to see what exists
-2. If a skill seems relevant to this slice (e.g. `systematic-debugging` for a tricky bug, `frontend-ui-ux` for UI work), briefly describe what it offers and ask explicit approval to use it
-3. **Always** ask approval for invoking `subagent-driven-development`
-
-Do not assume a skill is needed. Do not use a skill without asking. If no skills apply, proceed normally.
+**Ask any clarifying questions now — before writing a single line of code.** Use `interrogate-me` if available.
 
 ---
 
@@ -110,3 +98,5 @@ Re-run the closing boundary test after any changes.
 **Suggested commit message** — run `git log --oneline -3`, match the project's format exactly.
 
 **Next:** If there are remaining slices in the plan, name the next one. Otherwise: "All slices complete — ready to ship."
+
+**Note:** Always ask for using subagents to work on independent slices in parallel. 

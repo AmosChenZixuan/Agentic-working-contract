@@ -1,6 +1,6 @@
 ---
 name: agent-scope
-description: First phase of the agent development chain. Use this skill when starting any non-trivial feature, fix, or change — before planning or writing code. Covers scoping, clarification, and writing a spec. Triggers on "let's scope this", "help me think through X", "what's the best approach for Y", or any request where the requirement is ambiguous or the approach is undecided. Always runs before agent-plan.
+description: Use this skill when starting any non-trivial feature, fix, or change — before planning or writing code. Covers scoping, clarification, and writing a spec. Triggers on "let's scope this", "help me think through X", "what's the best approach for Y", or any request where the requirement is ambiguous or the approach is undecided. Always runs before agent-plan.
 ---
 
 # agent-scope
@@ -34,9 +34,9 @@ Come prepared. Don't ask the user for things you can find yourself.
 
 ---
 
-## Phase 2: Clarify (one question at a time)
+## Phase 2: Clarify
 
-Ask only what you can't resolve by reading the code. One question per message — not a list. Wait for the answer before asking the next one.
+Apply `interrogate-me` if available. Conduct one-at-a-time questioning to clear vagueness. Ask only what you can't resolve by reading the code.
 
 You're done clarifying when you can answer all of these:
 - What problem does this solve, and for whom?

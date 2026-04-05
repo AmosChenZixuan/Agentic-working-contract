@@ -1,6 +1,6 @@
 ---
 name: agent-plan
-description: Second phase of the agent development chain. Use this skill after agent-scope produces a spec, or when a clear spec already exists and needs to be broken into implementation slices. Triggers on "plan this", "create a plan for", "break this into tasks", or when handed off from agent-scope. Always produces a plan file consumed by agent-code.
+description: Use this skill after agent-scope produces a spec, or when a clear spec already exists and needs to be broken into implementation slices. Triggers on "plan this", "create a plan for", "break this into tasks", or when handed off from agent-scope. Always produces a plan file consumed by agent-code.
 ---
 
 # agent-plan
@@ -18,7 +18,7 @@ Read the spec file. Before slicing, confirm:
 - The approach is concrete enough to name files and interfaces
 - There are no unresolved open questions that affect implementation
 
-If the spec is ambiguous, stop and resolve it — don't plan around uncertainty.
+If the spec is ambiguous, stop and resolve it — don't plan around uncertainty. Use `interrogate-me` if available.
 
 ---
 
