@@ -36,7 +36,7 @@ Come prepared. Don't ask the user for things you can find yourself.
 
 ## Phase 2: Clarify
 
-Apply `interrogate-me` if available. Conduct one-at-a-time questioning to clear vagueness. Ask only what you can't resolve by reading the code.
+Apply `grill-me` if available. Conduct one-at-a-time questioning to clear vagueness. Ask only what you can't resolve by reading the code.
 
 You're done clarifying when you can answer all of these:
 - What problem does this solve, and for whom?

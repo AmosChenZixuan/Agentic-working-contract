@@ -18,7 +18,7 @@ Read the spec file. Before slicing, confirm:
 - The approach is concrete enough to name files and interfaces
 - There are no unresolved open questions that affect implementation
 
-If the spec is ambiguous, stop and resolve it — don't plan around uncertainty. Use `interrogate-me` if available.
+If the spec is ambiguous, stop and resolve it — don't plan around uncertainty. Use `grill-me` if available.
 
 ---
 

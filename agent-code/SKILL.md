@@ -21,7 +21,7 @@ If handed a plan file, read the specific slice you're executing. Extract:
 
 If no plan exists (direct invocation), derive your own scope: one coherent behavior change, one closing boundary test, nothing more.
 
-**Ask any clarifying questions now — before writing a single line of code.** Use `interrogate-me` if available.
+**Ask any clarifying questions now — before writing a single line of code.** Use `grill-me` if available.
 
 ---
 
