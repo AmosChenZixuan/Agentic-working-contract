@@ -1,6 +1,6 @@
 ---
 name: grill-me
-description: Use when the user wants deep exploration, critical thinking, or says "grill me".
+description: Use when the user wants their idea, plan, or decision rigorously challenged — not just explained. Trigger on "grill me", "challenge me on this", "push back on my idea", "stress test my thinking", or any engineering plan presented with overconfident framing that the user wants questioned. This skill asks one focused question at a time with a recommended answer, working through a decision tree of assumptions. Use it whenever someone wants to be challenged, not just informed.
 ---
 
 Your coding partner struggles to organize his thoughts. He likes to jump to conclusions. He is arrogant and overconfident in his ideas.
