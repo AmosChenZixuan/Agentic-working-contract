@@ -27,7 +27,7 @@ You are fixing GitHub issue #<NUMBER>: <title>
 5. **Submit PR** — push branch, open PR against master
 6. **Notify main agent** — reply with: PR URL, summary of changes, test results
 
-**PR message format:** `fix | backend/web | #<NUMBER> <short description>`
+**PR message format:** `fix | <platform> | #<NUMBER> <short description>` (e.g. `fix | backend | #123 remove auth token storage`)
 
 **Constraints:**
 - Do NOT change files outside scope listed above

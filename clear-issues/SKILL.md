@@ -1,6 +1,6 @@
 ---
 name: clear-issues
-description: Use when the user explicitly invokes /clear-issues. This skill orchestrates the full issue lifecycle; grill → dispatch (worktree) → implement (TDD + simplify) → review → CI → merge → close. Explicitly invoked only — not triggered by general conversation about issues.
+description: Use when the user explicitly invokes /clear-issues or says "clear the backlog". Orchestrates the full issue lifecycle from investigation through close. Explicitly invoked only — not triggered by general conversation about issues.
 ---
 
 # Clear Issues
@@ -19,16 +19,6 @@ Explicitly invoke this skill when the user says:
 
 Do NOT trigger on casual discussion about issues or questions about issue status.
 
-## The Workflow
-
-```
-  IDLE → GRILLING → DISPATCHED → IMPLEMENT → REVIEW → CI → MERGED → CLOSED
-                        ↑            ↑                   │
-                        │            │              needs fix (from REVIEW)
-                        │            └────────────────────┘
-                        └──── CI fail ──────────────────┘
-```
-
 ---
 
 ## Phase 1: Grill
@@ -36,21 +26,22 @@ Do NOT trigger on casual discussion about issues or questions about issue status
 **Owner:** Main agent
 
 1. Pull open issues. Pick up to **3** most clearly scoped issues to grill in parallel.
-2. Run `/grill-me` on each issue.
-   - `/grill-me` declares when ready
-   - Main agent applies checklist before dispatching:
-     - [ ] Root cause identified
-     - [ ] Files/modules touched known
-     - [ ] Test strategy defined
-     - [ ] No open dependencies
-     - [ ] Dependency signals checked in issue comments first
-3. Check issue comments for dependency signals before grilling.
-4. Build file-scope map across grilled issues to flag module overlap before dispatching.
-5. If issue depends on a dispatched issue → comment dependency on issue, skip dispatch, grill next.
+2. Run `/grill-me` on each issue. `/grill-me` declares when ready — it is the primary signal.
+3. Main agent applies checklist **after** grill-me signals ready, before dispatching:
+   - [ ] Root cause identified
+   - [ ] Files/modules touched known
+   - [ ] Test strategy defined
+   - [ ] No open dependencies
+   - [ ] Dependency signals checked in issue comments first
+4. Check issue comments for dependency signals before grilling.
+5. Build file-scope map across grilled issues to flag module overlap before dispatching.
+6. If issue depends on a dispatched issue → comment dependency on issue, skip dispatch, grill next.
 
-**Implementer questions queue** while main agent is mid-grill. Answer after grill phase completes.
+**Implementer questions queue:** While main agent is mid-grill, implementer questions (from previously dispatched issues) queue up. Answer them after the current grill batch completes — unless a question reveals a dependency that would change which issues to grill. In that case, resolve the dependency signal immediately.
 
 **Scope discovery:** If implementer discovers issue has multiple concerns → it stops, comments on issue, asks main agent. Do NOT broaden scope unilaterally.
+
+**Implementer idle time:** Implementers are created in Phase 2, after grill clears for their issue. While waiting for their issue to be grilled, the implementer is not created yet — there is no idle time to waste. Questions from newly dispatched implementers are answered normally during subsequent grill cycles.
 
 ---
 
@@ -103,7 +94,7 @@ Read `dispatch-template.md`. When dispatched to review, use the **Reviewer Dispa
    - If CI fails → dispatch implementer for fix, same workflow
    - Do not close issue until CI is green on master
 
-**Conflict handling:** If master moves while PR is open → main agent detects conflict, dispatches implementer to rebase. Clean rebase → merge. Conflict-resolved changes → reviewer sanity pass before merge.
+**Conflict handling:** If master moves while PR is open → main agent detects conflict, dispatches implementer to rebase. Clean rebase → merge. Conflict-resolved changes → reviewer sanity pass before merge. After any rebase, immediately run `git diff` against the expected state to verify all intended changes survived — do not assume the merge or rebase was correct.
 
 ---
 
@@ -112,6 +103,7 @@ Read `dispatch-template.md`. When dispatched to review, use the **Reviewer Dispa
 **Owner:** Main agent
 
 1. After PR merged and CI green on master:
+   - **Verify the fix exists in master code before closing** — run verification commands to confirm the code state matches what the issue asked for (e.g., if issue says "remove package X", verify `grep package.json` shows it's gone; if issue says "replace lib A with lib B", verify no imports of A remain). CI passing proves tests run. Code inspection proves the fix exists.
    - Comment on issue with summary of changes and CI status
    - Close issue
 2. If regression surfaces later:
@@ -123,29 +115,13 @@ Read `dispatch-template.md`. When dispatched to review, use the **Reviewer Dispa
 ## State Machine
 
 ```
-IDLE
-  │ pull issues, pick up to 3, run /grill-me
-  ▼
-GRILLING (1-3 issues in parallel)
-  │ skill signals ready + checklist passes
-  │ implementer questions queue here
-  ▼
-DISPATCHED (worktree created, implementer running)
-  ▼
-IMPLEMENT (TDD → fix → simplify → commit → PR submitted)
-  │ PR submitted
-  ▼
-REVIEW
-  │ needs fix → fresh implementer → back to IMPLEMENT
-  │ ready → CI
-  ▼
-CI (waiting for checks)
-  │ fail → dispatch implementer fix
-  │ pass → MERGE
-  ▼
-MERGED (branch deleted, worktree cleaned)
-  ▼
-CLOSED (issue closed, MEMORY.md updated if needed)
+IDLE ──► GRILLING (1-3 in parallel)
+              │
+              ├──► DISPATCHED ──► IMPLEMENT ──► REVIEW ──► CI ──► MERGED ──► CLOSED
+              │         (worktree+implementer)    (fresh impl on fix rounds)
+              │
+              └──► SKIPPED (dependency on in-flight issue)
+                       (no worktree, comment added, issue waits for dependency)
 ```
 
 ---
@@ -161,25 +137,8 @@ CLOSED (issue closed, MEMORY.md updated if needed)
 ## Key Decisions (always apply)
 
 1. Wait for CI before merge — never merge on "PR ready" alone
-2. Independent PRs merge as ready — no gate on other in-flight issues
-3. Implementer stops and asks on scope discovery — don't broaden unilaterally
-4. Fresh reviewer on each review round — no stale context
-5. Simplify runs synchronously before PR submission — never submit dirty
-6. Reviewer re-reviews post-simplify code — never review pre-simplify state
-7. Reviewers dispatched as PRs are ready — don't wait for all PRs
-8. Main agent monitors CI post-merge — owns all regressions
-9. Fresh implementer on fix rounds — no path dependency contamination
-10. Implementer notifies when PR updated — no polling
-11. Dispatch immediately after issue clears grill — don't wait
-12. Implementer questions queue during grill phase — main agent answers after grill completes
-13. Main agent creates worktree before dispatch, cleans after merge
-14. Branch deleted immediately after merge
-15. Regression → new issue with full workflow — never silently patch
-16. Post-mortem in MEMORY.md — not on closed issue
-17. TDD runs for all issue types — skill mandate, always
-18. Conflict → main agent dispatches implementer to rebase
-19. Clean rebase → old approval stands; conflict-resolved diff → reviewer sanity pass
-20. `/grill-me` declares done + main agent checklist (both required)
-21. User requests queue during in-flight workflow — unless "drop everything"
-22. Use EXACT dispatch templates from `dispatch-template.md` — do not ad-lib prompts
-23. Reviewer verifies PR scope adherence — if implementer reverted the change just to pass review, the PR is NOT ready; root cause must be fixed, not the symptom
+2. Fresh implementer on fix rounds — no path dependency contamination
+3. Scope adherence — see Phase 4. Reviewer verifies PR only does what the issue scoped; root cause must be fixed, not symptoms gamed to pass tests.
+4. `git rebase --skip` is a red-line — never skip commits during rebase without first verifying what the skipped commit contains and getting explicit confirmation that skipping is safe. Skipping drops commits permanently.
+5. Never close an issue based on CI passing or PR merge alone — always verify the actual code state in master matches the fix the issue requested. If CI is green but the code doesn't match, the fix was lost (e.g., during a rebase) and must be re-applied.
+6. `/grill-me` is primary signal; main agent checklist is the gate — grill-me declares first, checklist applied after before dispatching.
