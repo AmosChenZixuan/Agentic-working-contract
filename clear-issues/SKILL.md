@@ -87,6 +87,8 @@ Follow the dispatch template exactly. Key rules:
 
 Read `dispatch-template.md`. When dispatched to review, use the **Reviewer Dispatch Template**.
 
+**Scope adherence check:** The reviewer MUST verify the PR actually and only does what the issue scoped. If the implementer reverted the change just to pass review — the PR is obviously not ready. The fix must address the root cause, not merely make tests pass by removing the broken behavior.
+
 ---
 
 ## Phase 5: CI & Merge
@@ -180,3 +182,4 @@ CLOSED (issue closed, MEMORY.md updated if needed)
 20. `/grill-me` declares done + main agent checklist (both required)
 21. User requests queue during in-flight workflow — unless "drop everything"
 22. Use EXACT dispatch templates from `dispatch-template.md` — do not ad-lib prompts
+23. Reviewer verifies PR scope adherence — if implementer reverted the change just to pass review, the PR is NOT ready; root cause must be fixed, not the symptom

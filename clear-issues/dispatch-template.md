@@ -52,8 +52,9 @@ Files changed: <list>
 
 **Review steps:**
 
-1. Run `/code-review` skill on the PR
-2. Evaluate findings:
+1. **Scope adherence check** — verify the PR only contains changes scoped to the issue. If the implementer reverted the change just to pass review, the PR is NOT ready. The root cause must be fixed, not the symptom.
+2. Run `/code-review` skill on the PR
+3. Evaluate findings:
    - If issues found → dispatch FRESH implementer to same worktree with specific fix requests. Do NOT review the fix yourself — let the implementer fix and push.
    - If clean → signal main agent: "PR #<NUMBER> ready to merge"
 
@@ -62,6 +63,7 @@ Files changed: <list>
 - Test coverage adequate
 - No new tech debt introduced
 - Simplify findings were applied
+- PR only contains changes scoped to the issue — if the implementer reverted the change just to pass review, the PR is NOT ready; the root cause must be fixed, not the symptom
 
 **Rules:**
 - Fresh reviewer on each review round — do NOT reuse a reviewer who already reviewed this PR
