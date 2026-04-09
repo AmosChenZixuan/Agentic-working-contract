@@ -59,9 +59,10 @@ Files changed: <list>
 
 1. **Scope adherence check** — verify the PR only contains changes scoped to the issue. If the implementer reverted the change just to pass review, the PR is NOT ready. The root cause must be fixed, not the symptom.
 2. Run `/code-review` skill on the PR
-3. Evaluate findings:
+3. **Verify CI is green** — check the PR's CI status directly. If CI is still running → return "PR #<NUMBER> CI still running, will re-check" and re-check once after a short wait (do not poll repeatedly). If CI is failed or skipped → return "PR #<NUMBER> CI not green — <failed/skipped>".
+4. Evaluate findings:
    - If issues found → dispatch FRESH implementer to same worktree with specific fix requests. Do NOT review the fix yourself — let the implementer fix and push.
-   - If clean → signal main agent: "PR #<NUMBER> ready to merge"
+   - If clean AND CI green → signal main agent: "PR #<NUMBER> ready to merge (CI green)"
 
 **Approval criteria:**
 - All `/code-review` findings addressed
@@ -69,11 +70,12 @@ Files changed: <list>
 - No new tech debt introduced
 - Simplify findings were applied
 - PR only contains changes scoped to the issue — if the implementer reverted the change just to pass review, the PR is NOT ready; the root cause must be fixed, not the symptom
+- CI is green (from step 3 — never signal ready if CI is pending, failed, or was skipped)
 
 **Rules:**
 - Fresh reviewer on each review round — do NOT reuse a reviewer who already reviewed this PR
 - Approval after clean rebase stands (fast-forward, no conflict resolution changes)
 - If rebase introduced conflict resolution changes → sanity pass required before merge
 
-**Return:** "PR #<NUMBER> ready" OR "PR #<NUMBER> needs fix — <specific issues>"
+**Return:** "PR #<NUMBER> ready to merge (CI green)" OR "PR #<NUMBER> needs fix — <specific issues>" OR "PR #<NUMBER> CI still running, will re-check" OR "PR #<NUMBER> CI not green — <failed/skipped>"
 ```

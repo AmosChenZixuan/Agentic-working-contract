@@ -41,15 +41,15 @@ Pick up to **3** eligible issues to grill in parallel. Prefer lower layers first
 
 ### 1b. Grill
 
-1. Run `/grill-me` on each eligible issue. `/grill-me` declares when ready — it is the primary signal.
-2. Main agent applies checklist **after** grill-me signals ready, before dispatching:
+1. Run `/grill-me` on up to 3 eligible issues **in parallel**.
+2. **For each issue**, as soon as grill-me signals ready AND checklist passes, dispatch immediately — do NOT wait for other in-flight grilling to complete:
    - [ ] Root cause / goal identified
    - [ ] Files/modules touched known
    - [ ] Test strategy defined
    - [ ] No open dependencies (verified against dependency map)
    - [ ] Dependency signals checked in issue comments first
 3. Build file-scope map across grilled issues to flag module overlap before dispatching.
-4. If a dependency is still open → comment on the blocked issue, skip dispatch, grill next eligible issue.
+4. If a dependency is still open → comment on the blocked issue, skip dispatch, pick up next eligible issue.
 
 **Implementer questions queue:** While main agent is mid-grill, implementer questions (from previously dispatched issues) queue up. Answer them after the current grill batch completes — unless a question reveals a dependency that would change which issues to grill. In that case, resolve the dependency signal immediately.
 
@@ -67,9 +67,7 @@ Pick up to **3** eligible issues to grill in parallel. Prefer lower layers first
 2. Read `dispatch-template.md` and dispatch implementer using the **Implementer Dispatch Template**.
 3. Track issue state in task list:
    - `pending` → `grilling` → `dispatched` → `implement` → `review` → `CI` → `merged` → `closed`
-4. Dispatch as issues clear `/grill-me` — don't wait for all in-flight issues to clear.
-
-**Rule:** Parallel dispatch for independent issues. Each PR merges when its own CI is green and review is approved.
+4. Dispatch immediately per-issue — see Phase 1b for the per-issue dispatch rule.
 
 ---
 
@@ -100,13 +98,18 @@ Read `dispatch-template.md`. When dispatched to review, use the **Reviewer Dispa
 
 **Owner:** Main agent
 
-1. **Wait for CI before merge** — "PR ready" means reviewed, not mergeable
+1. **Verify CI green yourself** — do not trust the reviewer's "ready" signal alone. Check the PR's CI status directly (`gh run list` or PR status badge). If CI is still running → **poll every 30s** (up to 10 min) until result. If CI is failed or skipped:
+   - **Comment on PR**: "CI failed/skipped — holding merge. Dispatching fix."
+   - **Dispatch implementer** to the same worktree to fix the failing tests.
+   - Do NOT merge until CI is green.
 2. Squash merge to master
 3. Delete branch immediately after merge
 4. Delete worktree after merge
 5. Monitor CI post-merge:
    - If CI fails → dispatch implementer for fix, same workflow
    - Do not close issue until CI is green on master
+
+**CI waiting mechanism:** The main agent polls, not the reviewer. Reviewer signals "CI not green" and returns. Main agent owns the wait and dispatches implementer to fix if CI fails. Reviewer is freed up to handle other PRs.
 
 **Conflict handling:** If master moves while PR is open → main agent detects conflict, dispatches implementer to rebase. Clean rebase → merge. Conflict-resolved changes → reviewer sanity pass before merge. After any rebase, immediately run `git diff` against the expected state to verify all intended changes survived — do not assume the merge or rebase was correct.
 
@@ -131,20 +134,24 @@ Read `dispatch-template.md`. When dispatched to review, use the **Reviewer Dispa
 ## State Machine
 
 ```
-IDLE ──► TRIAGE (classify epics, build dependency map)
+IDLE ─► TRIAGE (classify epics, build dependency map)
               │
               ├──► EPIC (tracking only — closes when all sub-issues close)
               │
               └──► GRILLING (up to 3 eligible issues in parallel)
-                        │
-                        ├──► DISPATCHED ──► IMPLEMENT ──► REVIEW ──► CI ──► MERGED ──► CLOSED
+                        │         │
+                        │         └───(per issue: grill-me ready + checklist passes + no blocker)
+                        │                   │
+                        │                   ▼
+                        │              DISPATCHED ─► IMPLEMENT ─► REVIEW ─► CI ─► MERGED ─► CLOSED
                         │         (worktree+implementer)    (fresh impl on fix rounds)
-                        │                                                       │
-                        │                                              unblocks next layer
+                        |                                                       │
+                        |                                              unblocks next layer
                         │
                         └──► BLOCKED (dependency still open)
                                  (comment added, re-evaluated after each close)
 ```
+
 
 ---
 
@@ -158,7 +165,7 @@ IDLE ──► TRIAGE (classify epics, build dependency map)
 
 ## Key Decisions (always apply)
 
-1. Wait for CI before merge — never merge on "PR ready" alone
+1. **Verify CI green yourself** — check CI status directly before merge. "PR ready" means reviewed AND CI green. If CI is failed/pending/skipped, do not merge regardless of review signal.
 2. Fresh implementer on fix rounds — no path dependency contamination
 3. Scope adherence — see Phase 4. Reviewer verifies PR only does what the issue scoped; root cause must be fixed, not symptoms gamed to pass tests.
 4. `git rebase --skip` is a red-line — never skip commits during rebase without first verifying what the skipped commit contains and getting explicit confirmation that skipping is safe. Skipping drops commits permanently.
