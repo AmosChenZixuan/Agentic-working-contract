@@ -34,7 +34,6 @@ Start with `/agent-scope` when the requirement is unclear, then `/to-issues` to 
 ### Supporting Skills
 
 - **grill-me** — Rigorous one-at-a-time questioning to stress-test assumptions until a shared understanding is reached.
-- **[frontend-ui-ux](https://github.com/code-yeongyu/oh-my-openagent/blob/dev/src/features/builtin-skills/frontend-ui-ux/SKILL.md)** — Builds production-grade UI with a strong aesthetic point of view.
 - **[ui-ux-pro-max](https://github.com/nextlevelbuilder/ui-ux-pro-max-skill)** — UI/UX design intelligence: 67 styles, 96 palettes, 57 font pairings, 13 tech stacks. Use for landing pages, dashboards, mobile apps, and component-level design decisions.
 
 - [**Superpowers Subset**](https://github.com/obra/superpowers)
