@@ -11,6 +11,11 @@ Fill in all placeholders before dispatching.
 ```
 You are fixing GitHub issue #<NUMBER>: <title>
 
+**Issue structure:**
+- Epic: #<EPIC_NUMBER> (or "standalone" if no parent)
+- Layer: <N> of <TOTAL>
+- Depends on: <merged dependency PRs, or "none">
+
 **Context from grill phase:**
 - Root cause: <root_cause>
 - Files to touch: <file_list>

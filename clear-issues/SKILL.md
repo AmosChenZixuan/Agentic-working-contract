@@ -25,17 +25,31 @@ Do NOT trigger on casual discussion about issues or questions about issue status
 
 **Owner:** Main agent
 
-1. Pull open issues. Pick up to **3** most clearly scoped issues to grill in parallel.
-2. Run `/grill-me` on each issue. `/grill-me` declares when ready — it is the primary signal.
-3. Main agent applies checklist **after** grill-me signals ready, before dispatching:
-   - [ ] Root cause identified
+### 1a. Triage — epics and layers
+
+Before picking issues to grill, classify the open issues:
+
+- **Epic issues** (contain a sub-issues checklist) are tracking containers — never grill or dispatch them. They close when all sub-issues close.
+- **Sub-issues** have `Parent:`, `Layer:`, and `Depends on:` metadata in their body. Read these fields.
+- **Standalone issues** (no parent/layer metadata) are treated as Layer 1 with no dependencies.
+
+Build a dependency map from the metadata. An issue is **eligible** when:
+- All issues in its `Depends on:` list are closed (merged to master), AND
+- It is not an epic
+
+Pick up to **3** eligible issues to grill in parallel. Prefer lower layers first — don't grill Layer 2 while Layer 1 issues in the same epic are still open.
+
+### 1b. Grill
+
+1. Run `/grill-me` on each eligible issue. `/grill-me` declares when ready — it is the primary signal.
+2. Main agent applies checklist **after** grill-me signals ready, before dispatching:
+   - [ ] Root cause / goal identified
    - [ ] Files/modules touched known
    - [ ] Test strategy defined
-   - [ ] No open dependencies
+   - [ ] No open dependencies (verified against dependency map)
    - [ ] Dependency signals checked in issue comments first
-4. Check issue comments for dependency signals before grilling.
-5. Build file-scope map across grilled issues to flag module overlap before dispatching.
-6. If issue depends on a dispatched issue → comment dependency on issue, skip dispatch, grill next.
+3. Build file-scope map across grilled issues to flag module overlap before dispatching.
+4. If a dependency is still open → comment on the blocked issue, skip dispatch, grill next eligible issue.
 
 **Implementer questions queue:** While main agent is mid-grill, implementer questions (from previously dispatched issues) queue up. Answer them after the current grill batch completes — unless a question reveals a dependency that would change which issues to grill. In that case, resolve the dependency signal immediately.
 
@@ -106,7 +120,9 @@ Read `dispatch-template.md`. When dispatched to review, use the **Reviewer Dispa
    - **Verify the fix exists in master code before closing** — run verification commands to confirm the code state matches what the issue asked for (e.g., if issue says "remove package X", verify `grep package.json` shows it's gone; if issue says "replace lib A with lib B", verify no imports of A remain). CI passing proves tests run. Code inspection proves the fix exists.
    - Comment on issue with summary of changes and CI status
    - Close issue
-2. If regression surfaces later:
+2. **Epic auto-close:** After closing a sub-issue, check its parent epic. If all sub-issues in the epic's checklist are closed → close the epic with a summary comment.
+3. **Unblock next layer:** After closing a sub-issue, check if any blocked issues now have all dependencies met. If so, they become eligible for the next grill cycle — pick them up immediately rather than waiting for the user to re-invoke.
+4. If regression surfaces later:
    - File new issue, run full workflow from scratch
    - Post-mortem goes to MEMORY.md (not the closed issue)
 
@@ -115,13 +131,19 @@ Read `dispatch-template.md`. When dispatched to review, use the **Reviewer Dispa
 ## State Machine
 
 ```
-IDLE ──► GRILLING (1-3 in parallel)
+IDLE ──► TRIAGE (classify epics, build dependency map)
               │
-              ├──► DISPATCHED ──► IMPLEMENT ──► REVIEW ──► CI ──► MERGED ──► CLOSED
-              │         (worktree+implementer)    (fresh impl on fix rounds)
+              ├──► EPIC (tracking only — closes when all sub-issues close)
               │
-              └──► SKIPPED (dependency on in-flight issue)
-                       (no worktree, comment added, issue waits for dependency)
+              └──► GRILLING (up to 3 eligible issues in parallel)
+                        │
+                        ├──► DISPATCHED ──► IMPLEMENT ──► REVIEW ──► CI ──► MERGED ──► CLOSED
+                        │         (worktree+implementer)    (fresh impl on fix rounds)
+                        │                                                       │
+                        │                                              unblocks next layer
+                        │
+                        └──► BLOCKED (dependency still open)
+                                 (comment added, re-evaluated after each close)
 ```
 
 ---
