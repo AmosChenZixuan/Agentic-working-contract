@@ -58,14 +58,14 @@ Files changed: <list>
 **Review steps:**
 
 1. **Scope adherence check** — verify the PR only contains changes scoped to the issue. If the implementer reverted the change just to pass review, the PR is NOT ready. The root cause must be fixed, not the symptom.
-2. Run `/code-review` skill on the PR
+2. Run `/review` skill on the PR
 3. **Verify CI is green** — check the PR's CI status directly. If CI is still running → return "PR #<NUMBER> CI still running, will re-check" and re-check once after a short wait (do not poll repeatedly). If CI is failed or skipped → return "PR #<NUMBER> CI not green — <failed/skipped>".
 4. Evaluate findings:
    - If issues found → dispatch FRESH implementer to same worktree with specific fix requests. Do NOT review the fix yourself — let the implementer fix and push.
    - If clean AND CI green → signal main agent: "PR #<NUMBER> ready to merge (CI green)"
 
 **Approval criteria:**
-- All `/code-review` findings addressed
+- All `/review` findings addressed
 - Test coverage adequate
 - No new tech debt introduced
 - Simplify findings were applied

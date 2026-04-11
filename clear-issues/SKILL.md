@@ -34,7 +34,7 @@ Before picking issues to grill, classify the open issues:
 - **Standalone issues** (no parent/layer metadata) are treated as Layer 1 with no dependencies.
 
 Build a dependency map from the metadata. An issue is **eligible** when:
-- All issues in its `Depends on:` list are closed (merged to master), AND
+- All issues in its `Depends on:` list are closed (merged to target branch), AND
 - It is not an epic
 
 Pick up to **3** eligible issues to grill in parallel. Prefer lower layers first — don't grill Layer 2 while Layer 1 issues in the same epic are still open.
@@ -63,7 +63,7 @@ Pick up to **3** eligible issues to grill in parallel. Prefer lower layers first
 
 **Owner:** Main agent
 
-1. Create git worktree for each implementer (branch from current master). Use `superpowers:using-git-worktrees` skill.
+1. Create git worktree for each implementer (branch from the current working branch). Use `superpowers:using-git-worktrees` skill. Confirm the base branch with user if not obvious.
 2. Read `dispatch-template.md` and dispatch implementer using the **Implementer Dispatch Template**.
 3. Track issue state in task list:
    - `pending` → `grilling` → `dispatched` → `implement` → `review` → `CI` → `merged` → `closed`
@@ -102,16 +102,16 @@ Read `dispatch-template.md`. When dispatched to review, use the **Reviewer Dispa
    - **Comment on PR**: "CI failed/skipped — holding merge. Dispatching fix."
    - **Dispatch implementer** to the same worktree to fix the failing tests.
    - Do NOT merge until CI is green.
-2. Squash merge to master
+2. Squash merge to the agreed branch.
 3. Delete branch immediately after merge
 4. Delete worktree after merge
 5. Monitor CI post-merge:
    - If CI fails → dispatch implementer for fix, same workflow
-   - Do not close issue until CI is green on master
+   - Do not close issue until CI is green on the target branch
 
 **CI waiting mechanism:** The main agent polls, not the reviewer. Reviewer signals "CI not green" and returns. Main agent owns the wait and dispatches implementer to fix if CI fails. Reviewer is freed up to handle other PRs.
 
-**Conflict handling:** If master moves while PR is open → main agent detects conflict, dispatches implementer to rebase. Clean rebase → merge. Conflict-resolved changes → reviewer sanity pass before merge. After any rebase, immediately run `git diff` against the expected state to verify all intended changes survived — do not assume the merge or rebase was correct.
+**Conflict handling:** If target branch moves while PR is open → main agent detects conflict, dispatches implementer to rebase. Clean rebase → merge. Conflict-resolved changes → reviewer sanity pass before merge. After any rebase, immediately run `git diff` against the expected state to verify all intended changes survived — do not assume the merge or rebase was correct.
 
 ---
 
@@ -119,7 +119,7 @@ Read `dispatch-template.md`. When dispatched to review, use the **Reviewer Dispa
 
 **Owner:** Main agent
 
-1. After PR merged and CI green on master:
+1. After PR merged and CI green on the target branch:
    - **Verify the fix exists in master code before closing** — run verification commands to confirm the code state matches what the issue asked for (e.g., if issue says "remove package X", verify `grep package.json` shows it's gone; if issue says "replace lib A with lib B", verify no imports of A remain). CI passing proves tests run. Code inspection proves the fix exists.
    - Comment on issue with summary of changes and CI status
    - Close issue
@@ -169,5 +169,6 @@ IDLE ─► TRIAGE (classify epics, build dependency map)
 2. Fresh implementer on fix rounds — no path dependency contamination
 3. Scope adherence — see Phase 4. Reviewer verifies PR only does what the issue scoped; root cause must be fixed, not symptoms gamed to pass tests.
 4. `git rebase --skip` is a red-line — never skip commits during rebase without first verifying what the skipped commit contains and getting explicit confirmation that skipping is safe. Skipping drops commits permanently.
-5. Never close an issue based on CI passing or PR merge alone — always verify the actual code state in master matches the fix the issue requested. If CI is green but the code doesn't match, the fix was lost (e.g., during a rebase) and must be re-applied.
+5. Never close an issue based on CI passing or PR merge alone — always verify the actual code state in the target branch matches the fix the issue requested. If CI is green but the code doesn't match, the fix was lost (e.g., during a rebase) and must be re-applied.
 6. `/grill-me` is primary signal; main agent checklist is the gate — grill-me declares first, checklist applied after before dispatching.
+7. **Always confirm merge target and auto-merge** — before merging, explicitly confirm which branch to merge to (default to the current working branch, not master) and whether to auto-merge after CI passes or wait for user confirmation. Never assume.
