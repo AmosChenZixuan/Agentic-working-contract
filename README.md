@@ -10,11 +10,11 @@ Three ways to go from idea to shipped code. Pick the one that fits the job.
 
 | | feature-dev | agentic chain | Issue-driven |
 |---|---|---|---|
-| **Invoke** | `/feature-dev` | `/agent-scope` → `/agent-plan` → `/agent-code` | `/agent-scope` → `/to-issues` → `/clear-issues` |
+| **Invoke** | `/feature-dev` | `/agent-scope` → `/agent-plan` → `/agent-code` | `/grill-me` → `/to-issues` → `/clear-issues` |
 | **Best for** | Quick features in a familiar codebase | Cross-session work that needs rigor | Large features, multi-day work, team backlogs |
 | **Artifacts** | None (in-context only) | Spec file + plan file | Spec file + GitHub issues (epic + subs) |
 | **Survives context loss** | No | Yes (files on disk) | Yes (files + GitHub) |
-| **Scoping** | Clarifying questions after parallel exploration | Adversarial questioning via grill-me | Same as agent-\* (shares agent-scope) |
+| **Scoping** | Clarifying questions after parallel exploration | Adversarial questioning via grill-me | Adversarial questioning via grill-me |
 | **Architecture** | 3 competing designs (minimal / clean / pragmatic) | Single plan sliced into testable units | Same plan, decomposed into issues |
 | **Implementation** | Single pass in main context | TDD per slice, explicit scope check | TDD in isolated git worktrees |
 | **Review** | 3 parallel reviewers at the end (confidence ≥80) | Two-stage per slice (spec compliance → code quality) | Two-stage per issue + CI gate before merge |
@@ -32,7 +32,7 @@ agent-scope → agent-plan → agent-code
 
 ### Issue-Driven Development Workflow
 ```
-agent-scope → to-issues → clear-issues
+grill-me → to-issues → clear-issues
 ```
 
 - **to-issues** — Decomposes a spec into an epic with dependency-ordered sub-issues. Each issue carries structural metadata (`Parent:`, `Layer:`, `Depends on:`) so agents can pick it up cold.
