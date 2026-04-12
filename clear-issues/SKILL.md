@@ -80,7 +80,10 @@ Follow the dispatch template exactly. Key rules:
 1. **Write failing test first** — `/test-driven-development` skill mandates this. Test must fail before fix.
 2. **Simplify synchronously** — wait for `/simplify` results, apply all findings, commit before PR.
 3. **Scope discipline** — if scope discovery occurs, stop and ask. Do not broaden unilaterally.
-4. **Notify** — after PR is up, notify main agent with PR URL.
+4. **PR must include change summary and AC checklist** — before opening the PR, write in the PR description:
+   - **Change summary**: bullets explaining what changed and why
+   - **AC checklist**: Copy the issue's acceptance criteria into the PR, mark each as `[x]` (done) or `[ ]` (not applicable). This is required for reviewer to verify completeness.
+5. **Notify** — after PR is up, notify main agent with PR URL.
 
 ---
 
@@ -90,7 +93,7 @@ Follow the dispatch template exactly. Key rules:
 
 Read `dispatch-template.md`. When dispatched to review, use the **Reviewer Dispatch Template**.
 
-**Scope adherence check:** The reviewer MUST verify the PR actually and only does what the issue scoped. If the implementer reverted the change just to pass review — the PR is obviously not ready. The fix must address the root cause, not merely make tests pass by removing the broken behavior.
+**Scope + AC verification:** The reviewer verifies (a) the PR only does what the issue scoped, and (b) each AC item is satisfied. If the implementer reverted the change just to pass review — the PR is NOT ready. Root cause must be fixed, not symptoms gamed to pass tests.
 
 ---
 
@@ -167,8 +170,9 @@ IDLE ─► TRIAGE (classify epics, build dependency map)
 
 1. **Verify CI green yourself** — check CI status directly before merge. "PR ready" means reviewed AND CI green. If CI is failed/pending/skipped, do not merge regardless of review signal.
 2. Fresh implementer on fix rounds — no path dependency contamination
-3. Scope adherence — see Phase 4. Reviewer verifies PR only does what the issue scoped; root cause must be fixed, not symptoms gamed to pass tests.
+3. Scope + AC verification — see Phase 4. Reviewer verifies PR only does what the issue scoped AND each AC is satisfied.
 4. `git rebase --skip` is a red-line — never skip commits during rebase without first verifying what the skipped commit contains and getting explicit confirmation that skipping is safe. Skipping drops commits permanently.
 5. Never close an issue based on CI passing or PR merge alone — always verify the actual code state in the target branch matches the fix the issue requested. If CI is green but the code doesn't match, the fix was lost (e.g., during a rebase) and must be re-applied.
 6. `/grill-me` is primary signal; main agent checklist is the gate — grill-me declares first, checklist applied after before dispatching.
 7. **Always confirm merge target and auto-merge** — before merging, explicitly confirm which branch to merge to (default to the current working branch, not master) and whether to auto-merge after CI passes or wait for user confirmation. Never assume.
+8. **No force push** — implementer must create new commits for review fixes. Force push destroys review history and makes it impossible to track what changed between review rounds.
