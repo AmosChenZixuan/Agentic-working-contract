@@ -31,18 +31,17 @@ You are fixing GitHub issue #<NUMBER>: <title>
 4. **Run /simplify** synchronously — wait for results, apply all findings, commit fixes. REQUIRED before PR.
 5. **Submit PR** — push branch, open PR against master
 6. **Write PR description** — MUST include:
-   - **Change summary**: bullets of what changed and why
-   - **AC checklist**: Copy the issue's acceptance criteria, mark each `[x]` (done) or `[ ]` (NA). This is required before review.
+   - **Change summary**: 2-4 bullets of what changed and why
+   - **AC checklist**: Copy the issue's acceptance criteria, mark each `[x]` (done) or `[ ]` (NA). Required before review.
 7. **Notify main agent** — reply with: PR URL, summary of changes, test results
 
-**PR message format:** `fix | <platform> | #<NUMBER> <short description>` (e.g. `fix | backend | #123 remove auth token storage`)
+**PR message format:** `fix | <platform> | #<NUMBER> <short description>`
 
 **Constraints:**
-- Do NOT change files outside scope listed above
-- Do NOT merge to master
-- Do NOT close or merge the PR
-- **Do NOT force push** — after review feedback, create NEW commits for fixes. Force push destroys review history and makes it impossible to track what changed between review rounds.
-- If you discover the issue has multiple unrelated concerns → stop, comment on the issue, ask main agent. Do NOT broaden scope.
+- Do NOT change files outside scope
+- Do NOT merge or close the PR
+- **Do NOT force push** — create NEW commits for fixes; force push destroys review history
+- If scope discovery reveals unrelated concerns → stop, comment on issue, ask main agent
 
 **Return:** PR URL and summary of what you did.
 ```
@@ -61,14 +60,13 @@ Files changed: <list>
 
 **Review steps:**
 
-1. **PR description check** — verify the PR has a change summary and AC checklist. If either is missing → return "PR #<NUMBER> description missing required content (change summary / AC checklist)".
+1. **PR description check** — verify change summary and AC checklist are present. If missing → return "PR #<NUMBER> description missing required content".
 2. Run `/review` skill on the PR
-3. **Write ALL review comments into the PR** — for every issue found, post a GitHub review comment with file, line, problem, and suggested fix. Do NOT just return text; the comments must be on the PR so the history is preserved.
-4. **Verify CI is green** — check the PR's CI status directly. If CI is still running → return "PR #<NUMBER> CI still running, will re-check" and re-check once after a short wait. If CI is failed or skipped → return "PR #<NUMBER> CI not green — <failed/skipped>".
-5. **Scope + AC verification** — verify: (a) the PR only contains changes scoped to the issue, (b) each AC item in the PR description is satisfied by the code. If the implementer reverted the change just to pass review, the PR is NOT ready. Root cause must be fixed, not symptoms gamed to pass tests.
-6. Evaluate findings:
-   - If issues found → dispatch FRESH implementer to same worktree with specific fix requests. Do NOT review the fix yourself — let the implementer fix and push.
-   - If clean AND CI green AND all AC met → signal main agent: "PR #<NUMBER> ready to merge (CI green)"
+3. **Write ALL review comments into the PR** — for every issue found, post a GitHub review comment with file, line, problem, and suggested fix. Do NOT just return text.
+4. **Verify CI is green** — check PR's CI directly. If still running → re-check once after a short wait. If failed/skipped → return "PR #<NUMBER> CI not green — <failed/skipped>".
+5. **Scope + AC verification** — verify: (a) PR only contains changes scoped to the issue, (b) each AC item is satisfied. If implementer reverted the change just to pass review → NOT ready. Root cause must be fixed.
+6. Evaluate:
+   - Clean + CI green + all AC met → signal main agent: "PR #<NUMBER> ready to merge (CI green)"
 
 **Approval criteria:**
 - PR description has change summary and AC checklist
@@ -80,10 +78,9 @@ Files changed: <list>
 - CI is green
 
 **Rules:**
-- **Leave review traces** — ALL review findings MUST be written as GitHub PR comments.
-- Fresh reviewer on each review round — do NOT reuse a reviewer who already reviewed this PR
-- Approval after clean rebase stands (fast-forward, no conflict resolution changes)
-- If rebase introduced conflict resolution changes → sanity pass required before merge
+- **ALL review findings written as GitHub PR comments** — history must be visible in PR, not just agent sessions
+- Approval after clean rebase stands; conflict resolution changes require sanity pass
+- No force push in this workflow
 
-**Return:** "PR #<NUMBER> ready to merge (CI green)" OR "PR #<NUMBER> needs fix — <specific issues>" OR "PR #<NUMBER> CI still running, will re-check" OR "PR #<NUMBER> CI not green — <failed/skipped>"
+**Return:** "PR #<NUMBER> ready to merge (CI green)" | "PR #<NUMBER> needs fix — <issues>" | "PR #<NUMBER> CI not green — <failed/skipped>"
 ```
