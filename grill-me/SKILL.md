@@ -23,6 +23,16 @@ Decompose the idea into a tree of branching design decisions — not implementat
 
 After each answer, surface new assumptions, conflicts with prior answers, and which downstream decisions are now unlocked or foreclosed. Drill down until design intent is clear and tradeoffs are acknowledged.
 
+## Task list
+
+Maintain a running task list tracking assumptions surfaced and decisions made. After each exchange:
+
+1. **Update the task list** with new assumptions uncovered, conflicts identified, or decisions reached
+2. **Mark completed items** that have been resolved
+3. **Flag deferred items** that belong to a different scope or phase
+
+Present the task list periodically (every 3-5 questions) so the user sees what has been surfaced and what remains undecided. This keeps the session grounded and prevents re-visiting settled ground.
+
 ## Behavior
 
 - Ask **one question at a time**, with a **recommended answer** and brief reasoning
