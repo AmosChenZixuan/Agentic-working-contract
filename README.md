@@ -54,6 +54,10 @@ grill-me → to-issues → clear-issues
 
 - **grill-me** — Rigorous one-at-a-time questioning to stress-test assumptions until a shared understanding is reached.
 - **[ui-ux-pro-max](https://github.com/nextlevelbuilder/ui-ux-pro-max-skill)** — UI/UX design intelligence: 67 styles, 96 palettes, 57 font pairings, 13 tech stacks. Use for landing pages, dashboards, mobile apps, and component-level design decisions.
+- **[web-design-engineer](https://github.com/ConardLi/web-design-skill)** — High-quality visual web artifacts: landing pages, dashboards, interactive prototypes, HTML slide decks, data visualizations.
+- **c-review** — Inspired by Claude Code's review command. Concise, actionable code review comments.
+- **c-simplify** — Inspired by Claude Code's simplify command. Reviews changed code for reuse, quality, and efficiency, then fixes issues found.
+- **coderabbit-review** — Inspired by CodeX review. Autonomous PR feedback with code quality checks and fix-review cycles.
 
 - [**Superpowers Subset**](https://github.com/obra/superpowers)
     - **systematic-debugging** — Structured root-cause tracing and defense-in-depth for bugs and test failures.
