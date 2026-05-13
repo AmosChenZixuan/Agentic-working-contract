@@ -10,7 +10,7 @@
     {
       "name": "awc",
       "description": "Personal vibe coding skills",
-      "source": "./skills"
+      "source": "."
     }
   ]
 }
