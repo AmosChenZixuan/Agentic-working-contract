@@ -1,6 +1,6 @@
 {
   "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
-  "name": "amos-skills",
+  "name": "awc",
   "description": "Personal Claude Code skills + recommended third-party skills",
   "owner": {
     "name": "Amos Chen",
@@ -8,62 +8,9 @@
   },
   "plugins": [
     {
-      "name": "amos-skills",
+      "name": "awc",
       "description": "Personal vibe coding skills",
-      "source": "./skills",
-      "category": "productivity"
-    },
-    {
-      "name": "neat-freak",
-      "description": "End-of-session knowledge cleanup by KKKKhazix. See: https://github.com/KKKKhazix/khazix-skills",
-      "source": {
-        "source": "url",
-        "url": "https://github.com/KKKKhazix/khazix-skills"
-      },
-      "category": "productivity"
-    },
-    {
-      "name": "web-design-engineer",
-      "description": "Build visual web artifacts by ConardLi. See: https://github.com/ConardLi/garden-skills",
-      "source": {
-        "source": "url",
-        "url": "https://github.com/ConardLi/garden-skills"
-      },
-      "category": "design"
-    },
-    {
-      "name": "humanizer",
-      "description": "Remove AI writing patterns by blader. See: https://github.com/blader/humanizer",
-      "source": {
-        "source": "url",
-        "url": "https://github.com/blader/humanizer"
-      },
-      "category": "writing"
-    },
-    {
-      "name": "caveman",
-      "description": "Ultra-compressed communication mode by JuliusBrussee. See: https://github.com/juliusbrussee/caveman",
-      "source": {
-        "source": "url",
-        "url": "https://github.com/juliusbrussee/caveman"
-      },
-      "category": "productivity"
-    },
-    {
-      "name": "superpowers",
-      "description": "Skills library: TDD, debugging, collaboration patterns by obra. See: https://github.com/obra/superpowers",
-      "source": {
-        "source": "url",
-        "url": "https://github.com/obra/superpowers"
-      },
-      "category": "productivity"
-    }
-  ],
-  "references": [
-    {
-      "name": "rtk-ai/rtk",
-      "url": "https://github.com/rtk-ai/rtk",
-      "description": "RTK skills for Claude Code. Check README for installation instructions."
+      "source": "./skills"
     }
   ]
 }
