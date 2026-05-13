@@ -9,7 +9,7 @@
   "plugins": [
     {
       "name": "amos-skills",
-      "description": "Personal skills: c-review, c-simplify, cc-speed, clear-issues, coderabbit-review, grill-me, to-issues",
+      "description": "Personal vibe coding skills",
       "source": "./skills",
       "category": "productivity"
     },
