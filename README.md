@@ -4,16 +4,20 @@ Personal skills collection for AI coding agents. Built for **Claude Code**, also
 
 ## Install
 
-```bash
-claude plugin install https://github.com/AmosChenZixuan/Agentic-working-contract
-```
-
-Or via marketplace:
+**Claude Code:**
 
 ```bash
 claude plugin marketplace add AmosChenZixuan/Agentic-working-contract
 claude plugin install awc
 ```
+
+**Codex / OpenCode / Hermes / OpenClaw / others:**
+
+```bash
+git clone https://github.com/AmosChenZixuan/Agentic-working-contract ~/.awc
+```
+
+Then copy or symlink `~/.awc/skills/` into your agent's skills directory. Each skill is just a folder with a `SKILL.md` — no package manager needed.
 
 ---
 
