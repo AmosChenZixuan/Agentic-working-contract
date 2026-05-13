@@ -1,0 +1,17 @@
+{
+  "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
+  "name": "amos-skills",
+  "description": "Personal Claude Code skills: code review, debugging, project management, design tools",
+  "owner": {
+    "name": "Amos Chen",
+    "url": "https://github.com/AmosChenZixuan"
+  },
+  "plugins": [
+    {
+      "name": "amos-skills",
+      "description": "Personal skills collection: c-review, c-simplify, cc-speed, clear-issues, coderabbit-review, grill-me, humanizer, neat-freak, to-issues, web-design-engineer",
+      "source": "./skills",
+      "category": "productivity"
+    }
+  ]
+}
