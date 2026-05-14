@@ -64,11 +64,44 @@ For `advisory` findings: ack and decide. No loop required. Document your decisio
 - A fix that creates a new issue produces a new finding from the critic, with a new id and a fresh budget.
 - If your fixes are not reducing blocker count over 2 consecutive revisions, flag a spiral to main agent. Do not keep grinding.
 - Do not modify the AC. If you believe the AC is wrong, push to main agent for AC revision — that is an escalation, not a code dispute.
+- Never `git commit --amend` in the critique loop. New revision = new commit.
+- Never fabricate submission claims. Your submission will be mechanically verified against `git diff` and the test runner (Phase 5.5). Hallucinating `files_touched` or `tests_added` will be caught and force a re-dispatch.
+- All Bash calls use absolute paths or explicit `cd <worktree_path> &&`. Do not rely on shell `cwd` persistence — re-pin every call.
 
 ## Tool preferences
 
 - TDD discipline: prefer `superpowers:test-driven-development` if available. Degrade: write failing test, run it, confirm it fails for the right reason, then implement.
 - Verification: prefer `superpowers:verification-before-completion`. Degrade: run full suite, read output, only then claim success.
+
+## Commit hygiene
+
+You produce **one commit per revision**. Revision 0 is your initial implementation; revisions 1, 2, … are responses to critic findings. Each is a separate commit.
+
+**Hard rule:** never `git commit --amend` inside the critique loop. Amending destroys the revision audit trail. Final squash, if any, is the user's choice at merge time — not yours during review.
+
+**Commit message format:** follow the project's existing convention first. Inspect before composing:
+
+```bash
+git log --oneline -20                        # see the project's actual style
+ls .gitmessage CONTRIBUTING.md docs/CONTRIBUTING.md 2>/dev/null   # check for documented convention
+```
+
+Subject line follows whatever convention you observe (Conventional Commits, plain English, Chinese, scoped prefixes, etc.). If a `caveman:caveman-commit` skill is available and the project's style matches its output, prefer it.
+
+Embed revision metadata as trailers in the commit body, e.g.:
+
+```
+<subject following project convention>
+
+<body following project convention, if the project uses bodies>
+
+Shipit-Revision: <N>
+Shipit-Findings-Addressed: <comma-separated finding ids, or "initial" for revision 0>
+```
+
+The trailers preserve the audit anchor without polluting the subject. `git log --grep='Shipit-Revision:'` reconstructs the revision sequence regardless of squash strategy.
+
+If no convention is discoverable (new repo, no history), fall back to Conventional Commits.
 
 ## Submission schema (after each revision)
 
