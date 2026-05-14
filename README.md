@@ -10,7 +10,7 @@ Personal skills collection for AI coding agents. Built for **Claude Code**, also
 npx skills add AmosChenZixuan/Agentic-working-contract -g -y
 ```
 
-Bare skill names (`/agent-code`), works cross-platform, tracks updates via `npx skills update`.
+Bare skill names (`/shipit`), works cross-platform, tracks updates via `npx skills update`.
 
 **Claude Code only (marketplace):**
 
@@ -40,7 +40,7 @@ read https://github.com/AmosChenZixuan/Agentic-working-contract/blob/main/README
 
 You just installed a set of slash-command skills. Now do the following:
 
-1. **Confirm local skills are available.** Run `/agent-code --help` or equivalent.
+1. **Confirm local skills are available.** Run `/shipit --help` or equivalent.
 
 2. **Check what's already installed.** Run `npx skills ls` and `npx skills ls -g`, scan both `.agent/skills/` and `~/.agent/skills/`. Remove any already-installed skills from the checklist below — don't ask the human about things they already have.
 
@@ -85,9 +85,7 @@ All invoked as slash commands. Skills are auto-discovered from the `skills/` dir
 
 | Skill | What it does |
 |-------|-------------|
-| `/agent-scope` | Clarify ambiguous requirements into a concrete spec (file on disk) |
-| `/agent-plan` | Break a spec into ordered, testable implementation slices (file on disk) |
-| `/agent-code` | Execute a single slice, test-first, start to passing |
+| `/shipit` | Full-cycle PR delivery — main agent owns design + AC + planning + arbitration; spawns **Smith** (white-box implementer), **Scout** (black-box AC verifier), and **Hawk** (white-box reviewer) in a bounded critique loop on a worktree or feature branch; output is a ship-ready PR (never auto-merged) |
 | `/grill-me` | Challenge your idea with design-decision questions |
 | `/to-issues` | Convert specs or findings into agent-ready GitHub issues |
 | `/clear-issues` | Autonomous issue lifecycle: investigate → implement → review → merge |
@@ -97,23 +95,24 @@ All invoked as slash commands. Skills are auto-discovered from the `skills/` dir
 
 ---
 
-## Two core workflows
+## Core workflows
 
-The difference is **where intermediate results persist**:
+Two orthogonal axes: **how the work is partitioned** (context-boundary vs task-boundary) and **where intermediate state lives** (local files vs issue tracker).
 
-| | Agentic Flow | Issue-Driven Flow |
-|---|---|---|
-| **Persistence** | Local files (specs, plans on disk) | Remote issue tracker (GitHub Issues) |
-| **Traceability** | In repo — `git log` tells the story | In issues — comments, assignments, status transitions |
-| **Best for** | Solo, fast iteration, local context | Team visibility, async handoff, audit trail |
+| | Shipit Flow | Issue-Driven Flow | Superpower Flow |
+|---|---|---|---|
+| **Partition** | Context-boundary — Smith keeps full feature context end-to-end; parallel critics Scout + Hawk post-coding | Task-boundary — each subagent gets a slice via the issue tracker | Task-boundary — phases handed off via spec / plan files |
+| **Persistence** | Spec + AC + findings on disk; PR in git | GitHub Issues + comments | Spec + plan files in repo |
+| **Critique** | Parallel Scout (black-box AC) + Hawk (white-box review) with bounded pushback per finding | Reviews via PR comments / linked issues | Optional review skills, sequential |
+| **Best for** | Single PR-sized feature; minimal handoff loss; structured critique | Team visibility, async handoff, audit trail | Open-ended exploration where the problem space isn't yet defined |
 
-### Agentic Flow
+### Shipit Flow
 
 ```
-/agent-scope  →  /agent-plan  →  /agent-code
+/shipit  →  worktree/branch  →  design + AC  →  Smith (impl+test+refactor)  →  Scout ∥ Hawk critique  →  ship-ready PR
 ```
 
-Spec and plan files saved in repo. Each phase gates the next. Use as the daily driver.
+Main agent writes the spec + AC on a fresh worktree or feature branch (never on `main`), then dispatches Smith end-to-end. Scout and Hawk run in parallel after Smith submits; findings use a structured schema with a per-finding 3-pushback budget. Never auto-merges. Use as the daily driver for PR-sized features.
 
 ### Issue-Driven Flow
 
@@ -129,14 +128,14 @@ Intermediate results live in GitHub Issues — visible, assignable, auditable. U
 superpowers/brainstorm  →  write a plan  →  execute the plan
 ```
 
-Also file-based, but **heavier** — more constraints, higher token consumption. Use only when you genuinely don't know what to build yet. Requires `superpowers` installed.
+File-based, **heavier** — more constraints, higher token consumption. Use only when the problem space is wide open. Requires `superpowers` installed. shipit invokes parts of superpowers internally when available.
 
 ### Quick decision
 
 | Situation | Flow |
 |-----------|------|
-| Solo, fast iteration | Agentic Flow |
+| Single PR-sized feature, fast iteration | Shipit Flow |
 | Team, async handoff, audit trail | Issue-Driven Flow |
 | Problem space is wide open, need creative exploration | Superpower Flow |
-| Concrete bug fix or small feature | Skip to `/agent-code` |
+| Concrete bug fix or small feature | `/shipit` (still — it handles trivial features too, just lighter critique) |
 | Just want code reviewed | `/c-review` or `/c-simplify` |
