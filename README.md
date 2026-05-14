@@ -29,11 +29,10 @@ cp -r /tmp/awc/skills/* ~/.agent/skills/
 ```
 
 ### Install third-party skills
-After install, tell your agent: 
+After install, tell your agent:
 ```
-install the third-party skills recommended by AWC
+read https://github.com/AmosChenZixuan/Agentic-working-contract/blob/main/README.md and install the third-party skills
 ```
-It will read this README and walk through the rest.
 
 ---
 
@@ -43,32 +42,32 @@ You just installed a set of slash-command skills. Now do the following:
 
 1. **Confirm local skills are available.** Run `/agent-code --help` or equivalent.
 
-2. **Check what's already installed.** Scan `~/.claude/skills/`, `~/.claude/plugins/`, and `npx skills ls -g` (if available). Remove any already-installed skills from the checklist below — don't ask the human about things they already have.
+2. **Check what's already installed.** Run `npx skills ls -g` and scan `~/.claude/skills/`. Remove any already-installed skills from the checklist below — don't ask the human about things they already have.
 
-3. **Present an interactive checklist of the remaining (uninstalled) skills** (max 4 options per question — split into 2 questions if needed).
+3. **Present an interactive checklist** (max 4 options per question — split into 2 questions if needed).
    Use your platform's Q&A tool: Claude Code → `AskUserQuestion` (multiSelect: true), OpenCode → `question`, Hermes → `clarify`.
-   If your platform has no Q&A tool (Codex, OpenClaw), post as markdown and ask the human to reply.
+   If no Q&A tool, post as markdown and ask the human to reply.
 
    **Question 1 — Workflow & output:**
-   - superpowers — brainstorming, TDD, debugging workflows
-     install: `claude plugin install superpowers`
-   - caveman — ultra-compressed output, stop explaining just do
-     install: `claude plugin marketplace add JuliusBrussee/caveman && claude plugin install caveman`
-   - web-design-engineer — production frontend design, no AI aesthetic
+   - superpowers — brainstorming, TDD, debugging
+     install: `npx skills add obra/superpowers -g -y`
+   - caveman — ultra-compressed output
+     install: `npx skills add JuliusBrussee/caveman -g -y`
+   - web-design-engineer — production frontend design
      install: `npx skills add ConardLi/garden-skills -s web-design-engineer -g -y`
 
    **Question 2 — Cleanup & style:**
    - neat-freak — end-of-session knowledge cleanup
      install: `npx skills add KKKKhazix/khazix-skills -s neat-freak -g -y`
-   - humanizer — remove AI writing patterns from generated text
+   - humanizer — remove AI writing patterns
      install: `npx skills add blader/humanizer -s humanizer -g -y`
 
 4. Install only the skills the human picked.
 
-5. **Tell the human how to update these later:**
-   - `claude plugin update <name>` for superpowers, caveman
-   - `npx skills update` for web-design-engineer, neat-freak, humanizer
-   - Run `npx skills ls -g` to check what's installed and if updates are available
+5. **Tell the human how to update:**
+   - `npx skills ls -g` — check what's installed and if updates are available
+   - `npx skills update` — update all skills
+   - `npx skills update <name>` — update a single skill
 
 ---
 
