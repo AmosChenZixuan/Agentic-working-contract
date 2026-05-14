@@ -57,16 +57,18 @@ ask_user:
 
 ## User's response options
 
-User picks one per escalated item:
+User picks one per escalated item. Each maps to a `user_resolution` value that the ship-ready gate reads (see `finding-schema.md` and SKILL.md Phase 8). "Ship anyway, fix later" is not a permitted option — `accept_escalated` is its only legitimate audit-trailed form.
 
-- **Accept escalated** — mark as `acked`, treat as ship-ready exception. Audit trail preserves the dispute.
-- **Override critic** — force-close the finding, ship-ready. Audit trail preserves the override.
-- **Side with critic** — Smith must fix. Pushback budget resets for this finding. Restart loop.
-- **Revise AC** — main agent updates AC; affected slices restart from Phase 5 (Smith re-dispatch with new contract).
-- **Revise spec** — full restart from Phase 3 (spec rewrite).
-- **Abort** — stop. No ship. Branch left in current state for manual handling.
+| Option label | `user_resolution` value | Effect on finding | Loop effect |
+|---|---|---|---|
+| **Accept escalated** | `accept_escalated` | `status: acked` (ship-ready exception, audit-trailed) | none |
+| **Override critic** | `override_critic` | `status: acked` (force-close, audit-trailed) | none |
+| **Side with critic** | `side_with_critic` | `status: open`, `pushback_count: 0` | Smith re-dispatched to fix; on critic re-verify pass, `status: fixed` |
+| **Revise AC** | `revise_ac` | finding re-evaluated against new AC | Phase 5 restart (Smith re-dispatch with revised AC) |
+| **Revise spec** | `revise_spec` | finding re-evaluated against new spec | Phase 3 restart (spec rewrite) |
+| **Abort** | `abort` | finding frozen as-is | shipit terminates; branch left for manual handling |
 
-Main agent **never** decides escalations unilaterally in v1. Main agent packages context; user arbitrates.
+Main agent **never** decides escalations unilaterally in v1. Main agent packages context; user arbitrates. Main agent records the user's choice into `finding.user_resolution`, then re-runs the ship-ready gate.
 
 ## Output format to user
 

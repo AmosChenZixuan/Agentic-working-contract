@@ -23,6 +23,21 @@ Scout and Hawk run in parallel post-coding and feed structured findings back to 
 - **Never auto-ship.** End state is a ship-ready PR. User merges manually.
 - **Never on main.** Smith refuses to work on `main` or `master`. Worktree preferred, feature branch fallback.
 
+## Role boundaries
+
+Each role has explicit allowed inputs, allowed outputs, and forbidden actions. Boundary violations are an orchestrator bug, not a judgment call. The point is to prevent role drift under time pressure or when an upstream agent has terminated.
+
+| Role | Allowed outputs | Forbidden actions |
+|---|---|---|
+| **Main agent** | spec, AC, plan, dispatch decisions, escalation packets, ship-ready handoff | edit code in the critique loop; modify findings' severity or status; resolve escalations without explicit user input |
+| **Smith** | code, tests, submission schema, justification text in finding `history` | modify AC; modify findings' severity/category; mark own finding `fixed` (only critic re-verify can) |
+| **Scout** | AC verification report, findings | edit code; accept a scope-based downgrade ("out-of-scope this PR") — that is always an escalation to main agent, never `acked`; negotiate AC text |
+| **Hawk** | code-review findings | edit code; accept a scope-based downgrade; flag AC compliance (that is Scout's surface) |
+
+**The escalation principle:** when an agent encounters a situation outside its allowed outputs, it escalates to main agent. It does not improvise. Main agent's own forbidden actions force it to escalate to the user instead of self-resolving.
+
+**Critique-loop re-dispatch rule:** if Smith's subagent has terminated and a new blocker requires code change, main agent re-dispatches a fresh Smith subagent with the state packet (spec, AC, findings, prior diff, revision_count). Main agent never edits code directly to "close out" a finding.
+
 ## Phases
 
 ### 0. Bootstrap
@@ -74,10 +89,29 @@ After Smith submits. Spawn Scout with `subagents/scout.md` (pass: AC, Smith's di
 
 Collect findings. Route blockers to Smith. Smith revises. Scout and Hawk re-verify. Per-finding pushback ≤3 re-raises per id. Track spiral. Escalate any of: (a) per-finding 3-pushback exhaustion, (b) Scout↔Hawk conflict on same code, (c) regression spiral.
 
-### 8. Convergence or escalation
+If Smith's subagent has terminated between revisions, re-dispatch a fresh Smith with the state packet. Main agent never patches the code itself to close a finding (see Role boundaries above).
 
-- All blockers `fixed` or critic-accepted-justification → ship-ready
-- Any blocker `escalated` → produce packet per `references/escalation-packet.md`, ask user. User decides per-finding: accept escalated, override, revise AC, revise spec, or abort.
+### 8. Ship-ready gate
+
+`ship_ready` is a computed state, not a label Smith claims. Main agent verifies the gate mechanically before producing the handoff. The gate is:
+
+```
+ship_ready :=
+      every finding.status ∈ {fixed, acked}
+  AND no finding has status == open
+  AND no finding has status == escalated without a recorded user_resolution
+        ∈ {accept_escalated, override_critic, side_with_critic→fixed, revise_ac→fixed, revise_spec→fixed}
+  AND every required phase (0a, 0b, 1..7, 10) has a completion record
+  AND every submission's completeness_declaration is present and non-degraded
+        (see references/finding-schema.md and subagents/smith.md)
+```
+
+If the gate fails, main agent does NOT ship. Options:
+
+- Blocker `open` → route back into Phase 7 (re-dispatch Smith if needed).
+- Blocker `escalated` with no user resolution → produce packet per `references/escalation-packet.md`. User picks one of the response options. Main agent records the chosen `user_resolution` in the finding, then re-checks the gate. **"Ship anyway, file follow-up issue" is not a permitted resolution** — it must be `accept_escalated` (which is a deliberate audit-trailed override), not silent dismissal.
+- Completeness declaration missing → that itself is a finding raised against the submitting agent; loop continues.
+- Phase 10 not yet run → run it (it is part of the gate, not optional cleanup).
 
 ### 9. Ship-ready handoff
 
@@ -95,6 +129,8 @@ User merges manually. shipit never runs `gh pr merge` or `git push`.
 ### 10. Post-ship knowledge cleanup
 
 Prefer `neat-freak`. Update docs, memory, CLAUDE.md if affected.
+
+This phase is part of the ship-ready gate, not optional polish. The handoff at Phase 9 must record that Phase 10 has run (or that the user explicitly waived it via `--skip-cleanup`).
 
 ## Reference files
 
