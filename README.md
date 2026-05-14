@@ -34,15 +34,24 @@ It will read this README and walk through the rest.
 You just installed a set of slash-command skills. Now do the following:
 
 1. **Confirm skills are available.** Run `/agent-code --help` or equivalent.
-2. **Present an interactive checklist.** Use your platform's Q&A tool: Claude Code → `AskUserQuestion` (multiSelect: true), OpenCode → `question`, Hermes → `clarify`. If your platform has no such tool (Codex, OpenClaw), post the list below as markdown and ask the human to reply with their picks. Don't install everything — each one costs context and tokens.
 
-   | Skill | Install command |
-   |-------|----------------|
-   | superpowers — brainstorming, TDD, debugging | `claude plugin install superpowers` |
-   | caveman — ultra-compressed output | `claude plugin marketplace add JuliusBrussee/caveman && claude plugin install caveman` |
-   | web-design-engineer — production frontend design | `npx skills add ConardLi/garden-skills -s web-design-engineer` |
-   | neat-freak — end-of-session knowledge cleanup | clone `KKKKhazix/khazix-skills`, copy the `neat-freak/` directory into `~/.claude/skills/` |
-   | humanizer — remove AI writing patterns | clone `blader/humanizer`, copy the skill directory into `~/.claude/skills/` |
+2. **Present an interactive checklist** (max 4 options per question — split into 2 questions if needed).
+   Use your platform's Q&A tool: Claude Code → `AskUserQuestion` (multiSelect: true), OpenCode → `question`, Hermes → `clarify`.
+   If your platform has no Q&A tool (Codex, OpenClaw), post as markdown and ask the human to reply.
+
+   **Question 1 — Workflow & output:**
+   - superpowers — brainstorming, TDD, debugging workflows
+     install: `claude plugin install superpowers`
+   - caveman — ultra-compressed output, stop explaining just do
+     install: `claude plugin marketplace add JuliusBrussee/caveman && claude plugin install caveman`
+   - web-design-engineer — production frontend design, no AI aesthetic
+     install: `npx skills add ConardLi/garden-skills -s web-design-engineer -g -y`
+
+   **Question 2 — Cleanup & style:**
+   - neat-freak — end-of-session knowledge cleanup
+     install: clone `KKKKhazix/khazix-skills`, copy the `neat-freak/` directory into `~/.claude/skills/`
+   - humanizer — remove AI writing patterns from generated text
+     install: clone `blader/humanizer`, copy the skill directory into `~/.claude/skills/`
 
 3. Install only the skills the human picked. Then done — start using the workflows below.
 
