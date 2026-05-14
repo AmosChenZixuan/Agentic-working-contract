@@ -1,6 +1,6 @@
 # Agentic Working Contract (AWC)
 
-Personal skills collection for AI coding agents. Built for **Claude Code**, also compatible with OpenCode, Codex, Hermes, OpenClaw.
+Personal skills collection for AI coding agents. Built for **Claude Code**, also compatible with OpenCode, Codex, and others.
 
 ## Install
 
@@ -11,52 +11,71 @@ claude plugin marketplace add AmosChenZixuan/Agentic-working-contract
 claude plugin install awc
 ```
 
-Skills are invoked as `/awc:skill-name` (e.g. `/awc:agent-code`).
-
-**Codex / OpenCode / Hermes / OpenClaw / others:**
+**Codex / OpenCode / Hermes / OpenClaw / Others:**
 
 ```bash
 git clone https://github.com/AmosChenZixuan/Agentic-working-contract ~/.awc
 ```
 
-Copy or symlink `~/.awc/skills/` into your agent's skills directory. No namespace — invoke as bare skill name (e.g. `agent-code`).
+Then copy `~/.awc/skills/` into your agent's skills directory.
+
+
+### Install Third-party Skills
+After install, tell your agent: 
+```
+install the third-party skills recommended by AWC
+```
+It will read this README and walk through the rest.
 
 ---
 
 ## For agents reading this
 
-After installing the plugin above, do the following:
+You just installed a set of slash-command skills. Now do the following:
 
-1. **Confirm local skills are available.** Test with `/awc:agent-code --help` or equivalent.
-2. **Present a third-party skills checklist** to your human. Ask which ones they want. Don't install everything — each has a cost in context and tokens.
+1. **Confirm skills are available.** Run `/agent-code --help` or equivalent.
+2. **Present a third-party skills checklist** to your human. Ask which ones they want. Don't install everything — each one costs context and tokens.
 
-| Skill | What it's for | Install |
-|-------|--------------|---------|
-| `superpowers` | Structured brainstorming, TDD, debugging workflows | `claude plugin install superpowers` |
-| `caveman` | Ultra-compressed output — stop explaining, just do | `claude plugin install caveman` |
-| `web-design-engineer` | Production-grade frontend design, no AI aesthetic | `npx skills add ConardLi/garden-skills -s web-design-engineer` |
-| `neat-freak` | End-of-session knowledge cleanup | Copy `SKILL.md` from `https://github.com/KKKKhazix/khazix-skills/tree/main/neat-freak` into skills dir |
-| `humanizer` | Remove AI writing patterns from generated text | Copy `SKILL.md` from `https://github.com/blader/humanizer` into skills dir |
+Copy this checklist into your response and ask the human to pick:
 
-3. Once the human chooses, install only those. Then you're done — start using the workflows below.
+```
+Which third-party skills do you want me to install?
+
+[ ] superpowers — brainstorming, TDD, debugging workflows
+    install: claude plugin install superpowers
+
+[ ] caveman — ultra-compressed output, stop explaining just do
+    install: claude plugin marketplace add JuliusBrussee/caveman && claude plugin install caveman
+
+[ ] web-design-engineer — production frontend design, no AI aesthetic
+    install: npx skills add ConardLi/garden-skills -s web-design-engineer
+
+[ ] neat-freak — end-of-session knowledge cleanup
+    install: copy SKILL.md from https://github.com/KKKKhazix/khazix-skills/tree/main/neat-freak into ~/.claude/skills/
+
+[ ] humanizer — remove AI writing patterns from generated text
+    install: copy SKILL.md from https://github.com/blader/humanizer into ~/.claude/skills/
+```
+
+3. Install only the ones the human picks. Then done — start using the workflows below.
 
 ---
 
 ## Local skills
 
-Claude Code namespace: `/awc:`. Other agents: bare name.
+All invoked as slash commands. Skills are auto-discovered from the `skills/` directory.
 
 | Skill | What it does |
 |-------|-------------|
-| `/awc:agent-scope` | Clarify ambiguous requirements into a concrete spec (file on disk) |
-| `/awc:agent-plan` | Break a spec into ordered, testable implementation slices (file on disk) |
-| `/awc:agent-code` | Execute a single slice, test-first, start to passing |
-| `/awc:grill-me` | Challenge your idea with design-decision questions |
-| `/awc:to-issues` | Convert specs or findings into agent-ready GitHub issues |
-| `/awc:clear-issues` | Autonomous issue lifecycle: investigate → implement → review → merge |
-| `/awc:c-review` | Lightweight PR review using `gh` CLI |
-| `/awc:c-simplify` | Review changed code for reuse, quality, efficiency; fix issues |
-| `/awc:coderabbit-review` | Run CodeRabbit AI review from the terminal |
+| `/agent-scope` | Clarify ambiguous requirements into a concrete spec (file on disk) |
+| `/agent-plan` | Break a spec into ordered, testable implementation slices (file on disk) |
+| `/agent-code` | Execute a single slice, test-first, start to passing |
+| `/grill-me` | Challenge your idea with design-decision questions |
+| `/to-issues` | Convert specs or findings into agent-ready GitHub issues |
+| `/clear-issues` | Autonomous issue lifecycle: investigate → implement → review → merge |
+| `/c-review` | Lightweight PR review using `gh` CLI |
+| `/c-simplify` | Review changed code for reuse, quality, efficiency; fix issues |
+| `/coderabbit-review` | Run CodeRabbit AI review from the terminal |
 
 ---
 
@@ -73,7 +92,7 @@ The difference is **where intermediate results persist**:
 ### Agentic Flow
 
 ```
-/awc:agent-scope  →  /awc:agent-plan  →  /awc:agent-code
+/agent-scope  →  /agent-plan  →  /agent-code
 ```
 
 Spec and plan files saved in repo. Each phase gates the next. Use as the daily driver.
@@ -81,7 +100,7 @@ Spec and plan files saved in repo. Each phase gates the next. Use as the daily d
 ### Issue-Driven Flow
 
 ```
-/awc:grill-me  →  /awc:to-issues  →  /awc:clear-issues
+/grill-me  →  /to-issues  →  /clear-issues
 ```
 
 Intermediate results live in GitHub Issues — visible, assignable, auditable. Use when collaborating or needing async handoff.
@@ -101,11 +120,5 @@ Also file-based, but **heavier** — more constraints, higher token consumption.
 | Solo, fast iteration | Agentic Flow |
 | Team, async handoff, audit trail | Issue-Driven Flow |
 | Problem space is wide open, need creative exploration | Superpower Flow |
-| Concrete bug fix or small feature | Skip to `/awc:agent-code` |
-| Just want code reviewed | `/awc:c-review` or `/awc:c-simplify` |
-
----
-
-## Compatibility
-
-Built for **Claude Code**. OpenCode, Codex, Hermes, OpenClaw users: invoke skills by bare name after copying to your skills directory. Third-party skills that install via `npx skills add` work across platforms.
+| Concrete bug fix or small feature | Skip to `/agent-code` |
+| Just want code reviewed | `/c-review` or `/c-simplify` |
