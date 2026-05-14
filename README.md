@@ -34,30 +34,17 @@ It will read this README and walk through the rest.
 You just installed a set of slash-command skills. Now do the following:
 
 1. **Confirm skills are available.** Run `/agent-code --help` or equivalent.
-2. **Present a third-party skills checklist** to your human. Ask which ones they want. Don't install everything — each one costs context and tokens.
+2. **Present an interactive checklist.** Use your platform's Q&A tool: Claude Code → `AskUserQuestion` (multiSelect: true), OpenCode → `question`, Hermes → `clarify`. If your platform has no such tool (Codex, OpenClaw), post the list below as markdown and ask the human to reply with their picks. Don't install everything — each one costs context and tokens.
 
-Copy this checklist into your response and ask the human to pick:
+   | Skill | Install command |
+   |-------|----------------|
+   | superpowers — brainstorming, TDD, debugging | `claude plugin install superpowers` |
+   | caveman — ultra-compressed output | `claude plugin marketplace add JuliusBrussee/caveman && claude plugin install caveman` |
+   | web-design-engineer — production frontend design | `npx skills add ConardLi/garden-skills -s web-design-engineer` |
+   | neat-freak — end-of-session knowledge cleanup | clone `KKKKhazix/khazix-skills`, copy the `neat-freak/` directory into `~/.claude/skills/` |
+   | humanizer — remove AI writing patterns | clone `blader/humanizer`, copy the skill directory into `~/.claude/skills/` |
 
-```
-Which third-party skills do you want me to install?
-
-[ ] superpowers — brainstorming, TDD, debugging workflows
-    install: claude plugin install superpowers
-
-[ ] caveman — ultra-compressed output, stop explaining just do
-    install: claude plugin marketplace add JuliusBrussee/caveman && claude plugin install caveman
-
-[ ] web-design-engineer — production frontend design, no AI aesthetic
-    install: npx skills add ConardLi/garden-skills -s web-design-engineer
-
-[ ] neat-freak — end-of-session knowledge cleanup
-    install: copy SKILL.md from https://github.com/KKKKhazix/khazix-skills/tree/main/neat-freak into ~/.claude/skills/
-
-[ ] humanizer — remove AI writing patterns from generated text
-    install: copy SKILL.md from https://github.com/blader/humanizer into ~/.claude/skills/
-```
-
-3. Install only the ones the human picks. Then done — start using the workflows below.
+3. Install only the skills the human picked. Then done — start using the workflows below.
 
 ---
 
