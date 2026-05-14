@@ -4,23 +4,31 @@ Personal skills collection for AI coding agents. Built for **Claude Code**, also
 
 ## Install
 
-**Claude Code:**
+**All agents (recommended):**
+
+```bash
+npx skills add AmosChenZixuan/Agentic-working-contract -g -y
+```
+
+Bare skill names (`/agent-code`), works cross-platform, tracks updates via `npx skills update`.
+
+**Claude Code only (marketplace):**
 
 ```bash
 claude plugin marketplace add AmosChenZixuan/Agentic-working-contract
 claude plugin install awc
 ```
 
-**Codex / OpenCode / Hermes / OpenClaw / Others:**
+Note: marketplace adds a `/awc:` prefix to skill names.
+
+**Manual (any agent):**
 
 ```bash
-git clone https://github.com/AmosChenZixuan/Agentic-working-contract ~/.awc
+git clone https://github.com/AmosChenZixuan/Agentic-working-contract /tmp/awc
+cp -r /tmp/awc/skills/* ~/.agent/skills/
 ```
 
-Then copy `~/.awc/skills/` into your agent's skills directory.
-
-
-### Install Third-party Skills
+### Install third-party skills
 After install, tell your agent: 
 ```
 install the third-party skills recommended by AWC
@@ -33,9 +41,11 @@ It will read this README and walk through the rest.
 
 You just installed a set of slash-command skills. Now do the following:
 
-1. **Confirm skills are available.** Run `/agent-code --help` or equivalent.
+1. **Confirm local skills are available.** Run `/agent-code --help` or equivalent.
 
-2. **Present an interactive checklist** (max 4 options per question — split into 2 questions if needed).
+2. **Check what's already installed.** Scan `~/.claude/skills/`, `~/.claude/plugins/`, and `npx skills ls -g` (if available). Remove any already-installed skills from the checklist below — don't ask the human about things they already have.
+
+3. **Present an interactive checklist of the remaining (uninstalled) skills** (max 4 options per question — split into 2 questions if needed).
    Use your platform's Q&A tool: Claude Code → `AskUserQuestion` (multiSelect: true), OpenCode → `question`, Hermes → `clarify`.
    If your platform has no Q&A tool (Codex, OpenClaw), post as markdown and ask the human to reply.
 
@@ -49,11 +59,16 @@ You just installed a set of slash-command skills. Now do the following:
 
    **Question 2 — Cleanup & style:**
    - neat-freak — end-of-session knowledge cleanup
-     install: clone `KKKKhazix/khazix-skills`, copy the `neat-freak/` directory into `~/.claude/skills/`
+     install: `npx skills add KKKKhazix/khazix-skills -s neat-freak -g -y`
    - humanizer — remove AI writing patterns from generated text
-     install: clone `blader/humanizer`, copy the skill directory into `~/.claude/skills/`
+     install: `npx skills add blader/humanizer -s humanizer -g -y`
 
-3. Install only the skills the human picked. Then done — start using the workflows below.
+4. Install only the skills the human picked.
+
+5. **Tell the human how to update these later:**
+   - `claude plugin update <name>` for superpowers, caveman
+   - `npx skills update` for web-design-engineer, neat-freak, humanizer
+   - Run `npx skills ls -g` to check what's installed and if updates are available
 
 ---
 
