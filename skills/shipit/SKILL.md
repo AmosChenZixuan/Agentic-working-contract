@@ -2,7 +2,7 @@
 name: shipit
 description: Use when delivering a single PR-scoped feature end-to-end with multi-critic review loops. Triggers on "/shipit", "ship this feature", or any request for full-cycle feature delivery from design through ship-ready PR with structured critique.
 metadata:
-  version: 0.0.5
+  version: 0.0.6
 ---
 
 # shipit
@@ -102,24 +102,34 @@ Spawn subagent with `subagents/smith.md`. Pass: spec, AC, plan, design decisions
 
 **Exit:** Smith returns a submission schema. Submission is an **assertion** at this point — Phase 5.5 verifies it before it counts as fact.
 
-### 5.5. Submission verification (mechanical, non-skippable)
+### 5.5. Submission verification (cross-check, non-skippable)
 
-Smith's submission is a self-report. Subagent output cannot be trusted on its face — Smith may hallucinate code that was never written. Main agent verifies mechanically before Phase 6 dispatch.
+Smith's submission must carry its own falsifiable evidence (`verification_evidence` block — see `subagents/smith.md`). Phase 5.5 does NOT re-derive completion from scratch; it cross-checks Smith's attached evidence against one independent re-run. This is `references/audit-invariants.md` Invariant 4 applied to the Smith → Main boundary.
 
-From `project_context.worktree_path`:
+**Boundary admission check (before any work):**
+
+- `verification_evidence` block absent, OR `tests_passed != true`, OR `status: incomplete` → submission is **invalid at the boundary** (`rejected_unverified`). Not a thing to verify — a thing that was never a valid ship-ready submission. Re-dispatch Smith (incremental — see `references/role-boundaries.md`).
+
+**Cross-check (only if admitted):** from `project_context.worktree_path`:
 
 ```bash
 git -C "$worktree_path" status --porcelain
 git -C "$worktree_path" diff --name-only "$base_ref"...HEAD     # files actually changed
 git -C "$worktree_path" log --oneline "$base_ref"..HEAD         # commits actually made
-$test_command                                                   # actual test count + pass/fail
+$test_command                                                   # ONE independent re-run
 ```
 
-Cross-check against Smith's submission per the table in `references/state-file.md`. Any mismatch → submission is `rejected_unverified`. Main agent's only allowed action is **re-dispatch Smith** with the failure report. Main agent does NOT patch the gap itself (role contract — see `references/role-boundaries.md`).
+Compare the re-run's exit code + summary line against Smith's `verification_evidence`:
 
-Write `verification_report.<N>.yaml` (verdict `accept` | `reject` + evidence) per dispatch. `verification_failure_streak` is derived at check time as the count of trailing `reject` verdicts. If streak ≥ 2 or `smith_dispatch_count` ≥ 6, escalate to user.
+- Re-run matches attached evidence AND diff matches claimed `files_touched` → `accept`.
+- Re-run **contradicts** attached evidence (Smith reported pass, re-run fails; or summary counts diverge) → **integrity blocker**: Smith fabricated evidence. This is more severe than incompleteness — record `fabrication: true` in the report, escalate immediately (do not just re-dispatch silently).
+- Diff/commit mismatch (claimed files not in diff) → `rejected_unverified`, re-dispatch incremental.
 
-**Exit:** all claims verified; re-check Phase 4's size heuristic against actual diff (escalate if exceeded); `verification_report` artifact written.
+Main agent's only allowed actions are **accept**, **re-dispatch Smith incrementally**, or **escalate**. Main agent does NOT patch the gap itself (`references/role-boundaries.md` — no triviality exception).
+
+Write `verification_report.<N>.yaml` (verdict `accept` | `reject` | `fabrication` + evidence + the re-run output) per dispatch. `verification_failure_streak` is derived at check time as the count of trailing non-`accept` verdicts. If streak ≥ 2 or `smith_dispatch_count` ≥ 6, escalate to user.
+
+**Exit:** evidence admitted and cross-check `accept`; re-check Phase 4's size heuristic against actual diff (escalate if exceeded); `verification_report` artifact written.
 
 ### 6. Dispatch Scout + Hawk in parallel
 
@@ -201,9 +211,10 @@ These are the only unconditional rules. All other guidance is invariant-with-def
 
 - Never auto-merge. Output is a draft PR, not a merged PR.
 - Never work on `main` / `master`.
-- Smith must not skip Scout or Hawk. Both run on every feature.
+- Scout and Hawk run on every feature. No directive (including a reflection / post-mortem request) waives them; skipping is a hard-rule violation, not a judgment call.
 - All critic findings use the structured schema (`references/finding-schema.md`). No prose reviews.
-- Subagent submissions are unverified assertions until Phase 5.5 verifies them against repo state.
-- The ship-ready gate is a pure function of `shipit-state.yaml`. No re-derivation from chat history.
+- A subagent submission without falsifiable evidence attached (`verification_evidence`, `tests_passed: true`) is invalid at the Phase 5.5 boundary — not an assertion to verify later. See `references/audit-invariants.md` Invariant 4.
+- The ship-ready gate re-derives every condition from primary artifacts (git / filesystem / PR). It does NOT trust `shipit-state.yaml` fields or chat history as proof.
+- No triviality exception: main agent never edits code/tests in phases 5–7, regardless of change size. Re-dispatch Smith incrementally instead.
 - User is sole arbiter of escalations in v1. Main agent packages context; main agent does not decide.
 - `project_context` is populated once at Phase 1 and is read-only thereafter. Re-derivation at point of use is forbidden.

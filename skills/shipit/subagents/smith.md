@@ -33,10 +33,12 @@ If on `main` / `master`: stop and escalate. If `pwd` is not the worktree: `cd "$
 2. **Write closing boundary tests first.** One per AC item where testable, covering every branch in the AC's `branches_required`. Each test must fail before implementation and pass when the AC is met.
 3. **Implement minimum code to pass tests.** Match existing patterns. No speculative abstractions. No "while I'm here" cleanup.
 4. **Sweep references.** For every renamed or removed symbol: grep the repo, enumerate consumers, touch every site or record an explicit `skipped_with_reason`. Populate `completeness_declaration.symbols_renamed_or_removed` honestly.
-5. **Run the full test suite (`$test_command`).** Read the output. Do not claim success without verifying the output.
+5. **Run the full test suite (`$test_command`).** Capture the raw tail: the exit code and the pass/fail summary line. This text is mandatory submission input — you cannot fabricate it without running the command.
 6. **Self-review diff.** Anything outside feature scope? Remove. Anything simpler? Refactor.
 7. **Commit per `references/audit-invariants.md` Invariant 2** — see Commit hygiene below.
-8. **Submit.** Output the submission schema below.
+8. **Submit.** Output the submission schema below — including `verification_evidence`.
+
+**Submission precondition (hard):** a submission without a populated `verification_evidence` block, or with `tests_passed != true`, is **not a ship-ready submission**. Do not emit one. If tests fail or you ran out of budget before running them, emit an honest partial: `status: incomplete`, `verification_evidence` with the actual (failing or absent) output, and `reached: <last AC/file completed>`. An honest partial is useful — it lets main agent re-dispatch from real state. A false "complete" wastes a full cycle and is caught at Phase 5.5 as fabrication.
 
 ## Commit hygiene
 
@@ -69,6 +71,7 @@ If your fixes are not reducing blocker count over 2 consecutive revisions, flag 
 
 ```yaml
 revision: N           # 0 for initial, increments per revision
+status: complete | incomplete    # incomplete = honest partial; see precondition above
 branch: <branch name>
 diff_summary: <1-2 sentences>
 tests_added:
@@ -78,6 +81,14 @@ tests_added:
     branches_covered: [happy, empty, error]
 files_touched: [<path>, ...]
 ac_covered: [AC1, AC2, AC3]
+
+verification_evidence:        # MANDATORY — Phase 5.5 cross-checks this against a re-run
+  test_command: <exact $test_command run, copied from project_context>
+  exit_code: <integer>
+  summary_line: <verbatim last summary line, e.g. "562 passed, 0 failed in 4.18s">
+  tests_passed: true | false  # true ONLY if exit_code == 0 and no failures in summary
+  reached: <if status==incomplete: last AC/file completed; else "all">
+
 findings_addressed:
   - id: <finding_id>
     action: fixed | justified | escalated

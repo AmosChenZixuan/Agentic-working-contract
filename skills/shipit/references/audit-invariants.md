@@ -48,11 +48,16 @@ Intermediate commits within a revision (e.g., red / green / refactor under TDD) 
 
 **Forbidden:** main agent or any subagent silently committing after critic exit without bumping `critics_reviewed_ref` and re-running critics. A Phase 10 commit that touches source code is an invariant violation; re-run Phase 6 critics on the new HEAD before the gate can pass.
 
-## Invariant 4 — Gate derives from primary artifacts, never from self-report
+## Invariant 4 — Every actor boundary admits claims only with falsifiable evidence
 
-**Invariant:** Phase 8 ship-ready gate evaluates by re-deriving every condition from primary artifacts (git history, filesystem, GitHub PR state). State fields populated by main agent are inputs to derivation, never substitutes for it.
+**Invariant:** every actor boundary in shipit (Smith → Main at Phase 5.5; Main → Gate at Phase 8) admits a claim only when the claiming actor furnishes evidence that could falsify the claim. The downstream actor cross-checks the furnished evidence against an independent probe; it does not re-derive the claim from scratch, and it does not accept the claim on the actor's word. Absence of the falsifiable evidence makes the claim **invalid at the boundary** — not a thing to verify later.
 
-**Rationale:** Phase 5.5 exists because subagent self-report ≠ ground truth — Smith's claims are cross-checked against `git diff` and `$test_command` output. The same principle applies to the main agent. If main agent writes `phase_log` and reads `phase_log` to decide `ship_ready`, an omission on the write side is invisible on the read side. Same actor on both sides of the gate = self-consistency masquerading as correctness.
+**Rationale:** a self-reporting actor cannot certify its own completion — a budget-exhausted Smith still emits a "done" receipt; a main agent that forgets a phase on the write side forgets it on the read side too. Same actor on both sides of a boundary = self-consistency masquerading as correctness. The fix is not "verify harder downstream" (expensive, post-hoc — a full cycle wasted to reject). The fix is to shift the burden upstream: the claimant attaches the artifact that would prove it wrong if it lied. A budget-killed Smith physically cannot attach passing `$test_command` output (producing it requires running the command), so it cannot emit a false ship-ready claim — only an honest partial. Downstream then does a cheap cross-check, and a *mismatch* between furnished evidence and independent probe is a fabrication finding (more severe than incompleteness).
+
+**Two instantiations of the one rule:**
+
+- **Smith → Main (Phase 5.5):** Smith furnishes `verification_evidence` (raw `$test_command` tail). Missing / `tests_passed != true` → invalid at boundary. Furnished but contradicted by re-run → fabrication blocker.
+- **Main → Gate (Phase 8):** main agent furnishes nothing the gate trusts on its word; the gate re-derives every condition from primary artifacts (git history, filesystem, GitHub PR). `phase_log` / derived counters are inputs to derivation, never substitutes.
 
 **Primary artifact per required phase:**
 
@@ -73,7 +78,7 @@ Intermediate commits within a revision (e.g., red / green / refactor under TDD) 
 **Derived counters:** values computable from primary artifacts MUST NOT be stored as authoritative fields in the state file. The state file may cache them for performance, but the gate re-derives at evaluation time. Specifically:
 
 - `final_revision` ← `git log --grep "^Shipit-Revision:" "$base_ref"..HEAD` max N
-- `verification_failure_streak` ← count trailing `reject` verdicts in `verification_report.*.yaml`
+- `verification_failure_streak` ← count trailing non-`accept` verdicts (`reject` / `fabrication`) in `verification_report.*.yaml`
 - `spiral_streak` ← count trailing revisions with non-decreasing blocker count, computed from finding `history` arrays
 
 `smith_dispatch_count` has no repo-side artifact (subagent spawns leave no trace) — kept as authoritative counter, but bounded by independent check at re-dispatch sites.
@@ -87,6 +92,6 @@ Each invariant covers a distinct failure mode:
 - **Without Invariant 1**, critics drift to prose reviews; pushback budget is unenforceable; escalations have no context.
 - **Without Invariant 2**, "ship this with a quick fixup amend" silently collapses the revision sequence — fine until you need to bisect a regression to a specific revision.
 - **Without Invariant 3**, "main agent fixed a small thing in Phase 10" silently ships unreviewed code under a green gate.
-- **Without Invariant 4**, the gate inherits the main agent's blind spots — a phase forgotten on the write side is forgotten on the read side, and `ship_ready: true` returns under the same omission that created the gap.
+- **Without Invariant 4**, a self-reporting actor certifies its own completion: a budget-exhausted Smith emits a false "done" and wastes a full verify cycle; the gate inherits the main agent's blind spots and returns `ship_ready: true` under the same omission that created the gap.
 
 All four failure modes have happened in practice. The invariants exist because the failures happened, not because they sound rigorous.

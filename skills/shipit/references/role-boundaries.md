@@ -12,7 +12,15 @@ Rules below are written as **invariants** (what must hold) with **default mechan
 |---|---|
 | spec; AC; plan; dispatch decisions; phase_log entries; ship-ready gate evaluation; escalation packets; ship-ready handoff | edit code or tests in any phase 5..7 (re-dispatch Smith instead); modify a finding's severity, category, or id; resolve an escalation without a recorded `user_resolution`; populate `project_context` from inference at the moment of use (must be populated once at Phase 1) |
 
-**Re-dispatch rule:** if Smith's subagent has terminated, or Smith's submission was rejected at Phase 5.5, or a new blocker requires code change, main agent re-dispatches a fresh Smith with the full state packet (spec, AC, findings, prior diff, final_revision, `shipit-state.yaml` path). Main agent never patches the code directly to "close out" a finding.
+**No triviality exception.** Main agent editing code or tests in phases 5–7 is an invariant violation **regardless of how small the change is**. There is no "maintainer patch", "trivial one-liner", or "just unblock it" carve-out — none exists anywhere in this skill; inventing one at runtime is itself the violation. A one-line bug in Smith's output is a finding routed to Smith, not a main-agent edit. The cost argument ("re-dispatch is slow") is answered by incremental re-dispatch below, not by a boundary exception.
+
+**Re-dispatch rule (incremental).** If Smith's subagent terminated, Smith's submission was rejected at Phase 5.5, or a new blocker requires a code change, main agent re-dispatches Smith **incrementally**:
+
+- Same feature branch; **prior commits stay intact** (not a from-scratch re-run).
+- Packet = the narrow finding only: exact failing assertion + expected vs actual, or the specific Phase 5.5 mismatch — plus `shipit-state.yaml` path. Smith reads prior diff from the branch, not from a re-explanation.
+- A finding-scoped re-dispatch for a one-line fix is ~1 minute of Smith work, not a full re-implementation. This is why no triviality exception is needed: the cheap path is incremental re-dispatch, not main-agent patching.
+
+Main agent never patches the code directly to "close out" a finding.
 
 ## Smith — White-Box Feature Forger
 

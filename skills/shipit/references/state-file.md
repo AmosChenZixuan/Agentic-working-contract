@@ -67,7 +67,7 @@ counters:
   smith_dispatch_count:           <integer>              # incremented every Smith spawn; cap = 6
   # Derived (do not store as authoritative; gate re-derives):
   #   final_revision               ← git log --grep "^Shipit-Revision:" max N
-  #   verification_failure_streak  ← count trailing `reject` in verification_report.*.yaml; cap = 2
+  #   verification_failure_streak  ← count trailing non-`accept` in verification_report.*.yaml; cap = 2
   #   spiral_streak                ← count trailing revisions w/ non-decreasing blockers; cap = 2
 
 # ─── Findings index ─────────────────────────────────────────────────
@@ -94,7 +94,7 @@ run_outcome:
 - **Phase 0a** creates the file with `slug`, `spec_path`, `created_at`, and the first `phase_log` entry.
 - **Phase 1** populates `project_context` in full. After Phase 1 exits, `project_context` is read-only — later phases that need a value MUST read it from here. They MUST NOT re-derive (no second `git log` for commit convention, no second `pytest --collect-only`, no second `gh auth status`). If a value is missing from `project_context`, that is a Phase 1 defect — go back to Phase 1, do not work around.
 - **Each phase entry** appends to `phase_log` on entry, sets `exited_at` + `exit_conditions_met` + `artifacts` on exit.
-- **Phase 5.5** runs verification against `project_context.base_ref` and `project_context.test_command`, writes `verification_report.<N>.yaml` (verdict + evidence) per Smith revision. Failure streak is derived from these files, not stored.
+- **Phase 5.5** admits Smith's submission only if `verification_evidence` is present with `tests_passed: true`, then cross-checks it against one independent re-run. Writes `verification_report.<N>.yaml` (verdict `accept` | `reject` | `fabrication` + evidence + re-run output) per Smith revision. Failure streak is derived from these files (trailing non-`accept`), not stored.
 - **Phase 6** sets `critics_reviewed_ref = git rev-parse HEAD` when critics begin. Writes Scout + Hawk submission files keyed by revision N.
 - **Phase 7** updates `critics_reviewed_ref` on every Smith re-revision + critic re-verify cycle. Updates `findings_index`. Bumps `counters.smith_dispatch_count` on each Smith re-dispatch. Spiral streak is derived from finding `history` blocker counts, not stored.
 - **Phase 8 ship-ready gate** re-derives every condition from primary artifacts per audit-invariants Invariant 4. The gate does NOT trust `phase_log` entries or derived counters as proof. Per-phase artifact probes are listed in audit-invariants § Invariant 4.
