@@ -17,7 +17,7 @@ feature:         <feature name>
 branch:          <branch or worktree path>
 spec_link:       docs/specs/YYYY-MM-DD-<slug>.md
 ac_link:         <inline or path>
-revision_count:  N
+final_revision:  N            # highest revision N completed
 
 # For per-finding:
 finding:         <full finding object including complete history>

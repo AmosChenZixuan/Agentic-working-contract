@@ -12,7 +12,7 @@ Rules below are written as **invariants** (what must hold) with **default mechan
 |---|---|
 | spec; AC; plan; dispatch decisions; phase_log entries; ship-ready gate evaluation; escalation packets; ship-ready handoff | edit code or tests in any phase 5..7 (re-dispatch Smith instead); modify a finding's severity, category, or id; resolve an escalation without a recorded `user_resolution`; populate `project_context` from inference at the moment of use (must be populated once at Phase 1) |
 
-**Re-dispatch rule:** if Smith's subagent has terminated, or Smith's submission was rejected at Phase 5.5, or a new blocker requires code change, main agent re-dispatches a fresh Smith with the full state packet (spec, AC, findings, prior diff, revision_count, `shipit-state.yaml` path). Main agent never patches the code directly to "close out" a finding.
+**Re-dispatch rule:** if Smith's subagent has terminated, or Smith's submission was rejected at Phase 5.5, or a new blocker requires code change, main agent re-dispatches a fresh Smith with the full state packet (spec, AC, findings, prior diff, final_revision, `shipit-state.yaml` path). Main agent never patches the code directly to "close out" a finding.
 
 ## Smith — White-Box Feature Forger
 

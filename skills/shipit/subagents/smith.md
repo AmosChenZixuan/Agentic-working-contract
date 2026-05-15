@@ -102,7 +102,7 @@ When critique loop converges (no open blockers), output:
 status: ship_ready
 branch: <branch name>
 final_head_sha: <sha>
-revision_count: N
+final_revision: N            # highest revision N completed (initial-only run = 0)
 findings_summary:
   blockers_fixed: X
   blockers_escalated: Y

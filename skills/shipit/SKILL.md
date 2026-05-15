@@ -2,7 +2,7 @@
 name: shipit
 description: Use when delivering a single PR-scoped feature end-to-end with multi-critic review loops. Triggers on "/shipit", "ship this feature", or any request for full-cycle feature delivery from design through ship-ready PR with structured critique.
 metadata:
-  version: 0.0.4
+  version: 0.0.5
 ---
 
 # shipit
@@ -117,7 +117,7 @@ $test_command                                                   # actual test co
 
 Cross-check against Smith's submission per the table in `references/state-file.md`. Any mismatch → submission is `rejected_unverified`. Main agent's only allowed action is **re-dispatch Smith** with the failure report. Main agent does NOT patch the gap itself (role contract — see `references/role-boundaries.md`).
 
-Bump `counters.verification_failure_streak` on reject; reset to 0 on accept. If streak ≥ 2 or `smith_dispatch_count` ≥ 6, escalate to user.
+Write `verification_report.<N>.yaml` (verdict `accept` | `reject` + evidence) per dispatch. `verification_failure_streak` is derived at check time as the count of trailing `reject` verdicts. If streak ≥ 2 or `smith_dispatch_count` ≥ 6, escalate to user.
 
 **Exit:** all claims verified; re-check Phase 4's size heuristic against actual diff (escalate if exceeded); `verification_report` artifact written.
 
@@ -129,35 +129,45 @@ Set `critics_reviewed_ref = git rev-parse HEAD`. Spawn Scout (`subagents/scout.m
 
 ### 7. Critique loop
 
-Collect findings. Route blockers to Smith. Smith revises (one new commit per revision per `references/audit-invariants.md` Invariant 2). Scout and Hawk re-verify on the new HEAD; update `critics_reviewed_ref`. Per-finding pushback ≤3 re-raises per id. Track spiral via `counters.spiral_streak`. Escalate any of: per-finding 3-pushback exhaustion, Scout↔Hawk conflict on same code, regression spiral.
+Collect findings. Route blockers to Smith. Smith revises (one new commit per revision per `references/audit-invariants.md` Invariant 2). Scout and Hawk re-verify on the new HEAD; update `critics_reviewed_ref`. Per-finding pushback ≤3 re-raises per id. Spiral is derived at check time from finding `history` blocker counts across consecutive revisions (≥2 revisions without blocker decrease). Escalate any of: per-finding 3-pushback exhaustion, Scout↔Hawk conflict on same code, regression spiral.
 
 If Smith's subagent has terminated between revisions, re-dispatch a fresh Smith. Main agent never patches code (see `references/role-boundaries.md`).
 
 ### 8. Ship-ready gate
 
-Pure function of `shipit-state.yaml`. Main agent does NOT re-derive from chat history.
+Gate re-derives every condition from **primary artifacts** (git history, filesystem, GitHub PR state), not from `phase_log` or derived counters. See `references/audit-invariants.md` Invariant 4 for rationale and per-phase artifact table.
+
+Main agent MUST mechanically iterate the probe list below and record each probe's verdict + evidence. A `phase_log` entry is not proof; the artifact is proof. Skipping a probe is a gate violation.
+
+**Gate probes (must all pass):**
 
 ```
-ship_ready :=
-      every required phase has an exit record in phase_log
-        (required: 0a, 0b, 1, 2, 3, 4, 5, 5.5, 6, 7, 10)
-  AND every findings_index entry's status ∈ {fixed, acked}
-        (escalated counts as acked only with user_resolution set)
-  AND every Smith submission has a verification_report artifact
-  AND every submission's completeness_declaration is present and non-degraded
-  AND critics_reviewed_ref == `git rev-parse HEAD`
-        (no HEAD drift since last critic exit; Phase 10 docs-only commits are exempt per Invariant 3)
-  AND no counter exceeds its cap
-        (smith_dispatch_count ≤ 6; verification_failure_streak ≤ 2; spiral_streak ≤ 2)
+P0a   git -C "$worktree_path" rev-parse --abbrev-ref HEAD ≠ {main,master}; worktree dir exists
+P0b   project_context.gh_authenticated == true
+P1    every project_context field non-null or explicitly "unavailable" with reason
+P3    docs/specs/<slug>/spec.md exists; ≥1 AC item; each AC has branches_required
+P5    git log --grep "^Shipit-Revision: 0" "$base_ref"..HEAD returns ≥1 commit
+P5.5  verification_report.<final_revision>.yaml exists; verdict == accept
+       where final_revision := git log --grep "^Shipit-Revision:" max N
+P6/7  Scout + Hawk submission files exist for final_revision
+       critics_reviewed_ref == `git -C "$worktree_path" rev-parse HEAD`
+       every findings_index entry: status ∈ {fixed, acked}
+       every entry with status == escalated: user_resolution != null
+P10   `git log --grep "^Shipit-Phase-10: true"` returns ≥1 commit
+       OR docs/specs/<slug>/phase-10-waived.txt exists with user signature line
+Caps  smith_dispatch_count ≤ 6
+       derived verification_failure_streak ≤ 2
+       derived spiral_streak ≤ 2
 ```
 
-If the gate fails:
+If any probe fails:
 
-- Blocker `open` → route back into Phase 7.
+- P5/P5.5/P6/P7 blocker `open` → route back into Phase 7.
 - Blocker `escalated` without `user_resolution` → produce packet per `references/escalation-packet.md`. **"Ship anyway, file follow-up issue" is not a permitted resolution** — `accept_escalated` is the only audit-trailed equivalent.
-- Completeness declaration missing → finding raised against the submitting agent; loop.
-- HEAD drift → re-run Phase 6 critics on the current HEAD.
-- Phase exit record missing → resume from that phase.
+- Completeness declaration missing in a submission file → finding raised against submitting agent; loop.
+- HEAD drift (probe P6/P7 fails on SHA match) → re-run Phase 6 critics on current HEAD.
+- P10 missing → run Phase 10 OR produce waiver file (requires explicit user `--skip-cleanup` confirm; main agent does not self-waive).
+- Any probe missing primary artifact while `phase_log` claims phase exited → journaling drift; the artifact is authoritative, the journal is wrong. Re-run that phase.
 
 ### 9. Ship-ready handoff
 

@@ -48,12 +48,45 @@ Intermediate commits within a revision (e.g., red / green / refactor under TDD) 
 
 **Forbidden:** main agent or any subagent silently committing after critic exit without bumping `critics_reviewed_ref` and re-running critics. A Phase 10 commit that touches source code is an invariant violation; re-run Phase 6 critics on the new HEAD before the gate can pass.
 
-## Why three invariants, not one
+## Invariant 4 — Gate derives from primary artifacts, never from self-report
+
+**Invariant:** Phase 8 ship-ready gate evaluates by re-deriving every condition from primary artifacts (git history, filesystem, GitHub PR state). State fields populated by main agent are inputs to derivation, never substitutes for it.
+
+**Rationale:** Phase 5.5 exists because subagent self-report ≠ ground truth — Smith's claims are cross-checked against `git diff` and `$test_command` output. The same principle applies to the main agent. If main agent writes `phase_log` and reads `phase_log` to decide `ship_ready`, an omission on the write side is invisible on the read side. Same actor on both sides of the gate = self-consistency masquerading as correctness.
+
+**Primary artifact per required phase:**
+
+| Phase | Primary artifact (gate probes this, not `phase_log`) |
+|---|---|
+| 0a   | worktree exists at `project_context.worktree_path`; current branch ≠ `main`/`master` |
+| 0b   | `gh auth status` ok; `project_context.gh_authenticated == true` |
+| 1    | every `project_context` field non-null (or explicitly `unavailable` with reason) |
+| 2    | `phase_log` entry present (intent clarification has no on-disk artifact — accept journal entry here) |
+| 3    | `docs/specs/<slug>/spec.md` exists; ≥1 AC item; each AC has `branches_required` |
+| 4    | plan artifact present in spec dir, OR `phase_log` entry recording "no split needed" with token estimate |
+| 5    | ≥1 commit on feature branch with `Shipit-Revision: 0` trailer |
+| 5.5  | `verification_report.<N>.yaml` exists for highest revision N; verdict `accept` |
+| 6/7  | per-revision Scout + Hawk submission files exist; `critics_reviewed_ref == git rev-parse HEAD`; all `findings_index` entries have `status ∈ {fixed, acked}` with `user_resolution` set on any `escalated` |
+| 9    | `gh pr view "$pr_url"` returns; PR state = draft |
+| 10   | commit with trailer `Shipit-Phase-10: true` exists OR waiver file `docs/specs/<slug>/phase-10-waived.txt` exists with user signature |
+
+**Derived counters:** values computable from primary artifacts MUST NOT be stored as authoritative fields in the state file. The state file may cache them for performance, but the gate re-derives at evaluation time. Specifically:
+
+- `final_revision` ← `git log --grep "^Shipit-Revision:" "$base_ref"..HEAD` max N
+- `verification_failure_streak` ← count trailing `reject` verdicts in `verification_report.*.yaml`
+- `spiral_streak` ← count trailing revisions with non-decreasing blocker count, computed from finding `history` arrays
+
+`smith_dispatch_count` has no repo-side artifact (subagent spawns leave no trace) — kept as authoritative counter, but bounded by independent check at re-dispatch sites.
+
+**Forbidden:** gate accepting `phase_log` entry as proof of phase completion without probing the corresponding primary artifact. Gate trusting any derived counter read from state file without re-derivation.
+
+## Why four invariants, not one
 
 Each invariant covers a distinct failure mode:
 
 - **Without Invariant 1**, critics drift to prose reviews; pushback budget is unenforceable; escalations have no context.
 - **Without Invariant 2**, "ship this with a quick fixup amend" silently collapses the revision sequence — fine until you need to bisect a regression to a specific revision.
 - **Without Invariant 3**, "main agent fixed a small thing in Phase 10" silently ships unreviewed code under a green gate.
+- **Without Invariant 4**, the gate inherits the main agent's blind spots — a phase forgotten on the write side is forgotten on the read side, and `ship_ready: true` returns under the same omission that created the gap.
 
-All three failure modes have happened in practice. The invariants exist because the failures happened, not because they sound rigorous.
+All four failure modes have happened in practice. The invariants exist because the failures happened, not because they sound rigorous.
