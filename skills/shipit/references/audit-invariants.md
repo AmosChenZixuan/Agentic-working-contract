@@ -33,16 +33,16 @@ Intermediate commits within a revision (e.g., red / green / refactor under TDD) 
 
 **Final squash:** at merge time the user may squash all revision commits into one. The squashed commit's body should aggregate `Shipit-Findings-Addressed:` lines. GitHub's default squash-and-merge body preserves the trailers automatically; verify before merge.
 
-## Invariant 3 — Phase log is complete and the review ref is anchored
+## Invariant 3 — Phase log is complete (observability) and the review ref is anchored
 
-**Invariant:** every phase required by the ship-ready gate has an exit record in `shipit-state.yaml → phase_log`. The commit SHA that critics reviewed is anchored; the ship-ready gate verifies HEAD has not drifted since.
+**Invariant:** every phase has an exit record in `shipit-state.yaml → phase_log` for observability and resume — **this is not a gate input** (the gate re-derives from primary artifacts per Invariant 4; a missing phase_log entry is a journaling defect, a missing primary artifact is a gate failure). The commit SHA that critics reviewed is anchored; the ship-ready gate verifies HEAD has not drifted since.
 
 **Default mechanism:**
 
 - Each phase appends an entry to `phase_log` on entry; sets `exited_at` + `exit_conditions_met` + `artifacts` on exit. Schema in `state-file.md`.
-- Phase 6 sets `critics_reviewed_ref = git rev-parse HEAD` when Scout + Hawk begin a round.
-- Phase 7 updates `critics_reviewed_ref` each time critics re-verify a Smith revision.
-- Phase 8 ship-ready gate requires `git rev-parse HEAD == critics_reviewed_ref`. If HEAD has moved (any commit since last critic exit), gate fails. Findings are stale; re-dispatch critics on the new HEAD.
+- Phase 6 sets `critics_reviewed_ref = git -C "$git_anchor.worktree_path" rev-parse HEAD` when Scout + Hawk begin a round.
+- Phase 7 updates `critics_reviewed_ref` (same pinned command) each time critics re-verify a Smith revision.
+- Phase 8 ship-ready gate requires `git -C "$git_anchor.worktree_path" rev-parse HEAD == critics_reviewed_ref`. If HEAD has moved (any commit since last critic exit), gate fails. Findings are stale; re-dispatch critics on the new HEAD.
 
 **Phase 10 carve-out:** Phase 10 (post-ship knowledge cleanup) may modify docs / memory / CLAUDE.md. If Phase 10 produces a commit, the commit must carry trailer `Shipit-Phase-10: true` and touch ONLY non-source-code paths (docs, memory, top-level README, CLAUDE.md). Such commits are excluded from the `critics_reviewed_ref` invariance check.
 
@@ -57,21 +57,26 @@ Intermediate commits within a revision (e.g., red / green / refactor under TDD) 
 **Two instantiations of the one rule:**
 
 - **Smith → Main (Phase 5.5):** Smith furnishes `verification_evidence` (raw `$test_command` tail). Missing / `tests_passed != true` → invalid at boundary. Furnished but contradicted by re-run → fabrication blocker.
-- **Main → Gate (Phase 8):** main agent furnishes nothing the gate trusts on its word; the gate re-derives every condition from primary artifacts (git history, filesystem, GitHub PR). `phase_log` / derived counters are inputs to derivation, never substitutes.
+- **Main → Gate (Phase 8 → 9):** the main agent furnishes `gate_evidence.yaml` — per probe, the exact command and its **verbatim stdout** plus `pass`. Phase 9 entry rejects the gate if the block is absent, any `pass != true`, or any verdict lacks captured stdout (`gate_unverified`). The actor asserting the gate passed attaches the artifact that would falsify it; a bare `phase_log: "gate passed"` is the self-report this forbids.
+
+Both instantiations must carry a mandatory falsifying artifact. A statement on one side and an artifact on the other is asymmetric — the stated side degrades to self-report.
 
 **Primary artifact per required phase:**
 
+Every git probe below is pinned `git -C git_anchor.worktree_path`. An unpinned probe reads the ambient repo (possibly on `master`).
+
 | Phase | Primary artifact (gate probes this, not `phase_log`) |
 |---|---|
-| 0a   | worktree exists at `project_context.worktree_path`; current branch ≠ `main`/`master` |
+| 0a   | worktree exists at `git_anchor.worktree_path`; current branch ≠ `main`/`master` |
+| PG   | `rev-parse --abbrev-ref HEAD == git_anchor.feature_branch` (recorded branch is real); `rev-parse "$base_ref" == git_anchor.base_sha` (base has not advanced — no feature commit on `master`); no two `"$base_ref"..HEAD` commits share a `Shipit-Revision` value (no cherry-pick/recommit duplicates) |
 | 0b   | `gh auth status` ok; `project_context.gh_authenticated == true` |
 | 1    | every `project_context` field non-null (or explicitly `unavailable` with reason) |
 | 2    | `phase_log` entry present (intent clarification has no on-disk artifact — accept journal entry here) |
 | 3    | `docs/specs/<slug>/spec.md` exists; ≥1 AC item; each AC has `branches_required` |
 | 4    | plan artifact present in spec dir, OR `phase_log` entry recording "no split needed" with token estimate |
-| 5    | ≥1 commit on feature branch with `Shipit-Revision: 0` trailer |
+| 5    | ≥1 commit on `git_anchor.feature_branch` with `Shipit-Revision: 0` trailer |
 | 5.5  | `verification_report.<N>.yaml` exists for highest revision N; verdict `accept` |
-| 6/7  | per-revision Scout + Hawk submission files exist; `critics_reviewed_ref == git rev-parse HEAD`; all `findings_index` entries have `status ∈ {fixed, acked}` with `user_resolution` set on any `escalated` |
+| 6/7  | per-revision Scout + Hawk submission files exist; `critics_reviewed_ref == git -C $wt rev-parse HEAD`; all `findings_index` entries have `status ∈ {fixed, acked}` with `user_resolution` set on any `escalated` |
 | 9    | `gh pr view "$pr_url"` returns; PR state = draft |
 | 10   | commit with trailer `Shipit-Phase-10: true` exists OR waiver file `docs/specs/<slug>/phase-10-waived.txt` exists with user signature |
 

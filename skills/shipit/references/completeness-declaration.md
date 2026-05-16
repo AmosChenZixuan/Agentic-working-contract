@@ -78,6 +78,5 @@ completeness_declaration:
 
 ## Cross-cutting rules
 
-- Declarations are part of the ship-ready gate input. The gate (Phase 8) requires every Smith submission and every critic round to carry a non-degraded `completeness_declaration`.
-- A "degraded" declaration is one where the producer left a field blank or marked it `unknown`. That is itself a finding — not a defect, but a gap that must be triaged before ship-ready.
+- A "degraded" declaration (a field left blank or marked `unknown`), or a false one, is a **critic finding** against the producer (Scout audits Smith's; Hawk greps to verify; see rules above). It is enforced through the finding path — Invariant 1 + the Phase 8 P6/7 probe requires every `findings_index` entry `fixed`/`acked` — not a separate gate probe.
 - Three different roles missing three different completeness checks is a structural problem, not three individual lapses — these schemas exist to make all three explicit and verifiable.

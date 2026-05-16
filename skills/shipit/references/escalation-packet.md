@@ -15,7 +15,7 @@ When a finding cannot be resolved within the critique loop, main agent produces 
 escalation_type: per-finding | scout-hawk-conflict | spiral | ac-defect
 feature:         <feature name>
 branch:          <branch or worktree path>
-spec_link:       docs/specs/YYYY-MM-DD-<slug>.md
+spec_link:       docs/specs/YYYY-MM-DD-<slug>/spec.md
 ac_link:         <inline or path>
 final_revision:  N            # highest revision N completed
 

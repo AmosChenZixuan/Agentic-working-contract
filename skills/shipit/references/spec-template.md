@@ -1,6 +1,6 @@
 # Spec + AC Template
 
-Main agent writes the spec during Phase 3 of shipit. Save to `docs/specs/YYYY-MM-DD-<slug>.md`.
+Main agent writes the spec during Phase 3 of shipit. Save to `docs/specs/YYYY-MM-DD-<slug>/spec.md`.
 
 ## Template
 
