@@ -89,7 +89,6 @@ All invoked as slash commands. Skills are auto-discovered from the `skills/` dir
 | `/grill-me` | Challenge your idea with design-decision questions |
 | `/to-issues` | Convert specs or findings into agent-ready GitHub issues |
 | `/clear-issues` | Autonomous issue lifecycle: investigate → implement → review → merge |
-| `/c-review` | Lightweight PR review using `gh` CLI |
 | `/c-simplify` | Review changed code for reuse, quality, efficiency; fix issues |
 | `/coderabbit-review` | Run CodeRabbit AI review from the terminal |
 
@@ -138,4 +137,4 @@ File-based, **heavier** — more constraints, higher token consumption. Use only
 | Team, async handoff, audit trail | Issue-Driven Flow |
 | Problem space is wide open, need creative exploration | Superpower Flow |
 | Concrete bug fix or small feature | `/shipit` (still — it handles trivial features too, just lighter critique) |
-| Just want code reviewed | `/c-review` or `/c-simplify` |
+| Just want code reviewed | `/c-simplify` |
