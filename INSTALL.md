@@ -8,6 +8,24 @@ Read the manifest from the same repo as this file:
 - `skills:` — list of packages `{install_guide, provides:[{name, description}]}`. Cross-agent. Each package's `provides` are the skills its one `install_guide` installs.
 - `plugins:` — map of agent key → list of `{name, description}`. Match the current agent to a key **case-insensitively**, treating `claude`/`claude code`/`claude-code` as the same key (e.g. Claude Code → `claude`). If no key matches the current agent, skip plugins entirely.
 
+**Valid shape:**
+
+```yaml
+skills:
+  - install_guide: https://github.com/owner/repo/blob/main/README.md
+    provides:
+      - name: skill-a
+        description: what skill-a does
+      - name: skill-b
+        description: what skill-b does
+plugins:
+  claude:
+    - name: plugin-name
+      description: what the plugin does
+```
+
+Every entry under `skills:` must have both `install_guide` and `provides`. Entries missing either are malformed — infer the parent package from context (closest preceding valid package block), don't ask.
+
 ## Flow
 
 1. Drop already-installed entries (use your agent's native detection).
