@@ -34,7 +34,7 @@ The harness walks you through picking skills (superpowers, caveman, etc.) and Cl
 | `/to-issues` | Convert specs or findings into agent-ready GitHub issues |
 | `/clear-issues` | Autonomous issue lifecycle: investigate → implement → review → merge |
 | `/razor` | Guard a design before building — reconstructs the user's true need (≠ what they asked for), derives the smallest design that meets it, and names the rest as over-design. Pre-implementation only |
-| `/coderabbit-review` | Run CodeRabbit AI review from the terminal |
+| `/razor-code` | Cut cruft from code already written — flags over-engineering, needless complexity & duplication, dead-weight comments, and low-value tests, while keeping what protects correctness & safety. Post-implementation counterpart to `/razor` |
 
 ---
 
@@ -118,3 +118,4 @@ File-based, **heavier** — more constraints, higher token consumption. Use only
 | Problem space is wide open, need creative exploration | Superpower Flow |
 | Concrete bug fix or small feature | `/shipit` (still — it handles trivial features too, just lighter critique) |
 | Worried a design is overkill before building | `/razor` |
+| Code is written and you want it leaner | `/razor-code` |
