@@ -1,8 +1,6 @@
 ## Overview
 [1-2 sentence summary of the feature/change]
 
-Full spec: `<path-to-spec-file>`
-
 ## Sub-issues
 
 ### Layer 1 (no dependencies)
