@@ -62,7 +62,12 @@ invariant, a deliberate trade-off.
 cases over the same path, trivial getter/setter checks, and tests coupled to
 implementation detail that break on a safe refactor rather than on a behavior
 change. Keep — and flag if *missing* — the tests that catch real regressions:
-behavior, contracts, edge and error paths.
+behavior, contracts, edge and error paths. Weigh **cost** too: a test whose
+runtime or setup is disproportionate to what it covers is a liability even when
+green. If it's also low-value → cut it. If it's the only thing covering a real
+behavior → keep the coverage but flag the cost to be reduced (hoist a
+shared/module-scoped fixture, parametrize, shrink the payload); never delete the
+sole verifier of a behavior to save time.
 
 ## Process
 
@@ -117,7 +122,8 @@ this section if nothing qualifies.>
 
 ## Gaps
 <missing tests for real behavior or edge paths — the one place razor-code adds
-rather than removes. Omit if none.>
+rather than removes — plus necessary-but-expensive tests whose cost should be
+cut without losing coverage. Omit if none.>
 ```
 
 If the code is already lean, say so and stop.
