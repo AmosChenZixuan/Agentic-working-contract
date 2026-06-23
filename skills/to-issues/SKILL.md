@@ -1,6 +1,6 @@
 ---
 name: to-issues
-description: Convert a conversation or spec into agent-ready GitHub issues. Use when the user invokes /to-issues or /to-issue, says "file this", "break this into issues", "create issues from this", "capture this as backlog", or when conversation surfaces a bug, design gap, deferred work, or unverified idea worth tracking. Outputs spikes (time-boxed investigations), epics (sub-issue roadmaps), and issues (1:1 with a PR). Each filed issue is consumed by /clear-issues for grill → dispatch → implement. This is the counterpart to /clear-issues — it produces the backlog that /clear-issues consumes.
+description: Convert a conversation or spec into agent-ready GitHub issues. Use when the user invokes /to-issues or /to-issue, says "file this", "break this into issues", "create issues from this", "capture this as backlog", or when conversation surfaces a bug, design gap, deferred work, or unverified idea worth tracking. Outputs spikes (time-boxed investigations), epics (sub-issue roadmaps), and issues (1:1 with a PR). Each filed issue is agent-ready, so /shipit can take one and deliver a review-ready PR. The AWC chain is grill-me → to-issues → shipit.
 ---
 
 # to-issues

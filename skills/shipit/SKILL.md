@@ -1,119 +1,81 @@
 ---
 name: shipit
-description: Use when delivering a single PR-scoped feature end-to-end with multi-critic review loops. Triggers on "/shipit", "ship this feature", or any request for full-cycle feature delivery from design through ship-ready PR with structured critique.
+description: Use when delivering one agent-ready unit of work end-to-end into a review-ready PR. Triggers on "/shipit", "ship this", "ship this issue/spec", or any request to take a single feature/bug/refactor from spec through a reviewed, review-ready pull request. Takes ONE agent-ready unit (a GitHub issue, a spec, or a clear request) and produces ONE non-draft PR a human can review and merge. The final stage of the AWC chain: grill-me → to-issues → shipit. Not for clearing a backlog (shipit handles one unit per run) and not for merging (the human owns merge + close).
 metadata:
-  version: 0.1.0
+  version: 1.0.0
 ---
 
 # shipit
 
-Orchestrator. Main agent owns design, AC, planning, the ship gate, and arbitration. It spawns three named subagents per feature, each **once**, persisting for the whole run:
+Take **one agent-ready unit** → ship **one review-ready PR**. The main agent plans, codes, and commits; it spawns reviewer subagents only. It never merges and never closes the issue — a human reviews the PR and owns merge + close.
 
-- **Smith** — white-box implementer: design → tests → code → refactor. Full feature context, no compaction.
-- **Scout** — black-box AC verifier: exercises the feature from outside (playwright MCP for web-ui; curl / shell / test-runner otherwise). Never reads design rationale.
-- **Hawk** — white-box reviewer: correctness, safety, regression, perf, style.
-
-Scout and Hawk run in parallel after Smith's submission is verified, feeding lean findings back to Smith in a bounded loop. Output: a ship-ready **draft** PR — never auto-merged.
-
-## Principles
-
-- **Context-boundary.** Smith holds full feature context end-to-end and persists for the run (contact via SendMessage; cold respawn only if the handle is dead). No mid-flight compaction.
-- **Evidence boundary (hard).** A "done" without an attached test tail is not done. A submission lacking `verification_evidence` / `tests_passed: true` is invalid at the boundary — not a thing to verify later.
-- **Branch isolation (hard).** Never main/master. Verify the branch before the PR. Never auto-merge — output a draft PR.
-- **Structured critique.** Scout (black-box AC) ∥ Hawk (white-box code) after submit. Lean findings, no prose. Pushback ≤3 per finding id.
-- **Roles don't drift.** Main designs / dispatches / gates and never edits code in the loop. Critics review, never edit. Escalate, don't improvise. The user is sole arbiter of escalations.
-- **State on disk.** spec + findings + a small status file under `docs/specs/<date>-<slug>/`. Survives compaction and resume.
-- **Skill prefer / fallback.** Prefer an installed skill per step; else degrade inline. Never auto-install. If a step degrades, tell the user once.
-
-## Single PR scope
-
-Smith's initial context ≤ ~60k tokens. If the diff likely exceeds ~800 LOC or touches >8 files, split the feature upstream at step 3 and stop.
-
-## Skill preference
-
-| Step | Prefer | Else |
-|---|---|---|
-| Clarify | `superpowers:brainstorming` / `grill-me` | inline Q&A |
-| Plan | `superpowers:writing-plans` | inline slice list |
-| Smith impl | `superpowers:test-driven-development` + `superpowers:verification-before-completion` | inline TDD + verify |
-| Workspace | `superpowers:using-git-worktrees` | `git worktree add` / `git checkout -b` |
-| Hawk review | platform `/review` | inline |
-| Cleanup | `neat-freak` | inline doc/memory update |
-| Commit msg | `caveman:caveman-commit` | inline Conventional Commits |
+The AWC chain is `grill-me → to-issues → shipit`. shipit expects the spec to already be agent-ready; if it isn't, shipit creates one inline (below) rather than refusing.
 
 ## Flow
 
-State lives in `docs/specs/<date>-<slug>/status.yaml`:
+### 1. Spec — get to agent-ready
 
-```yaml
-slug:             <feature-slug>
-branch:           <feature branch>
-worktree:         <abs path | null>
-step:             1            # 1..8
-smith_dispatches: 0            # cap 6
-findings:         []           # [{id, severity, status}]
-pr_url:           null
-```
+A unit is **agent-ready** when it states: a single goal, scope (in / out), the files/modules touched, and acceptance criteria (AC) that are observable and testable. Read the input — a GitHub issue, a spec file, or the conversation.
 
-**1. Setup.** Determine workspace mode — honor a stated user choice; else ask `[branch / worktree / abort]`; never a silent default. On main/master, refuse and prompt. `branch` → `git checkout -b <slug>` from the repo's main ref. `worktree` → `superpowers:using-git-worktrees` if available, else `git worktree add`. Create `docs/specs/<date>-<slug>/`, write `status.yaml`, `cd` into the workspace.
+If it isn't agent-ready, build it inline: invoke `grill-me` to clarify the gaps, draft the spec, then invoke `razor` to cut it to the smallest design that meets the real need.
 
-**2. Clarify + spec.** Clarify intent (skill or inline) until problem / success / out-of-scope / constraints are answered. Write `spec.md`: problem, approach, scope (in / out), and the acceptance criteria. Each AC is observable and testable, has a stable id (`AC1`…), and declares `branches_required` (`happy`, plus `empty`/`error` where a negative path exists). At least one AC; no AC may read "works correctly".
+Then normalize the AC — **whatever the source**, a ready issue needs this too. Each AC gets a stable id (`AC1`…), names its required branches (`happy`, plus `empty`/`error` where a negative path exists), and states an outcome **observable from outside the code** — a returned value, an HTTP response, a rendered screen, a CLI exit — so the blackbox reviewer can verify it in step 4. At least one AC; none may read "works correctly".
 
-**3. Plan + size.** Plan the work (skill or inline slice list). Estimate Smith's initial load and the diff size. If >~60k tokens, >~800 LOC, or >8 files, split into multiple PRs and stop here.
+### 2. Workspace
 
-**4. Dispatch Smith.** Spawn Smith once (`subagents/smith.md`) with spec, AC, plan, and the `status.yaml` path. Bump `smith_dispatches`. Smith: write closing tests per AC branch → minimal implementation → sweep renamed/removed symbols → run `$test_command` → commit (subject per repo convention; the revision's last commit trailers `Shipit-Revision: <N>`) → submit the schema with `verification_evidence`.
+Never work on main/master — refuse and prompt. Honor a workspace mode the user already stated; otherwise ask `[branch / worktree]`, never a silent default. `branch` → `git checkout -b <slug>` (slug from the goal) from the repo's main ref. `worktree` → `superpowers:using-git-worktrees` if available, else `git worktree add`. `cd` in, then write the resolved spec to `spec.md` here — the only state shipit keeps on disk; it becomes the PR body.
 
-**5. Verify submission.** Admission: `verification_evidence` absent, or `tests_passed != true`, or `status: incomplete` → invalid at the boundary; re-dispatch Smith incrementally with the gap. If admitted, re-run `$test_command` **once** independently:
-- Re-run clean and consistent with the attached tail → accept; persist the raw submission to `submission.<N>.yaml`; re-check the step-3 size heuristic against the real diff (escalate if exceeded).
-- Re-run contradicts the attached evidence → fabrication; escalate to the user (do not silently re-dispatch).
+### 3. Plan
 
-**6. Scout ∥ Hawk.** With Smith idle (not terminated), spawn Scout (`subagents/scout.md`) and Hawk (`subagents/hawk.md`) once each on the accepted commit. Pass each the verified diff and the `status.yaml` path; pass Scout the feature type; do not pass Scout design rationale. Record the reviewed SHA.
+`razor` the approach (skip if step 1 already razored a fresh spec), then plan the work as TDD slices: for each AC branch, the failing test that pins it, then the minimal code to pass it. Keep the plan to the smallest set of slices the AC forces.
 
-**7. Critique loop.** Collect findings. SendMessage blockers to the persisted Smith (cold respawn only if its handle is dead). Smith revises (≥1 new commit per revision). SendMessage Scout and Hawk to re-verify the new HEAD; update the reviewed SHA. Pushback ≤3 per finding id; then that finding escalates. Escalate also on a Scout↔Hawk conflict on the same code, or 2 consecutive revisions with no blocker-count decrease. On escalation, stop and ask the user with the finding + both sides + options (side with critic / override / revise AC / revise spec / accept-escalated / abort); record the decision on the finding.
+### 4. The loop — code, then review, until clean
 
-**8. Ship gate → handoff → cleanup → reflection.**
+Main holds full context end-to-end and writes all code. Reviewers are subagents and never edit; they return findings, main fixes. Stages run **sequentially** — whitebox fully clears before blackbox starts.
 
-Gate — passes only if every item holds, each an independent artifact, not main's assertion. Missing any → not ship-ready, loop back; main may not substitute its own judgment for a missing artifact.
+1. **Code** (main). Write the failing tests for the slice, then the minimal implementation, then run the full suite green (the test command comes from the repo — CI config or package scripts). Commit. Commits are **incremental and never amended** — every revision is a new commit, so the trail is fully traceable. A revision with no passing test run is not done.
+2. **Whitebox** — invoke `razor-code` on the diff. It dispatches its own cold-eyes reviewers and returns findings. Apply safe cuts; any blocker → back to step 1.
+3. **Blackbox** — the AC verifier (`subagents/blackbox.md`). It walks the **full AC checklist** and confirms each from outside, picking the method per AC: live smoke / visual via MCP + screenshots where the AC is about a rendered or interactive surface, otherwise curl / shell / the test runner / output inspection. It runs on every feature — any spec has at least one AC. Any blocker → back to step 1.
 
-- Smith's last `verification_evidence` was re-run clean by main at step 5 (record exists, exit 0).
-- Scout's last report: every AC verified pass.
-- Hawk's last report: zero `open` blocker.
-- `git rev-parse --abbrev-ref HEAD` ∉ {main, master}.
-- Every `escalated` finding has a recorded user decision.
+Any code change re-enters at whitebox (re-run whitebox, then blackbox) — scope each re-run to the **incremental diff since the last clear**, not the whole PR, to keep the loop cheap. The loop exits only when whitebox returns zero blockers **and** blackbox confirms every AC with zero blockers. No iteration cap and no mid-loop escalation — the human's gate is the PR review.
 
-On pass: `git push -u <remote> <branch>`, then `gh pr create --draft` (title per repo convention; body = Scout AC report + Hawk summary + finding log). Set `pr_url`.
+Whitebox (`razor-code`) reviews for leanness, not correctness — it holds behavior sacred and won't hunt bugs. Inside shipit, correctness is guarded by **blackbox's AC verification**: does the feature actually do what each AC says, on every required branch. Deeper adversarial bug-hunting is intentionally **post-shipit** — a human, or review agents, run against the review-ready PR. shipit's job is to produce a PR worth reviewing, not to be the last line of defense.
 
-Handoff: output the PR url, Scout report, Hawk summary, finding log, escalations, and branch / worktree path.
+### 5. PR + handoff
 
-Cleanup (not gated): default on — `neat-freak` if available, else an inline doc/memory update. The user may skip with one word; no waiver file.
+Push, then `gh pr create` (**not** a draft — the reviewers already passed; title per repo convention). Body = the spec + a one-line whitebox summary + the blackbox AC report + the finding log; add `Closes #NN` if the unit was a GitHub issue. Post the **session reflection as a PR comment** (what was built, honest misses, anything the reviewer should look at hardest). Report `REVIEW-READY @ <url>`. The human reviews, merges, and closes.
 
-Reflection (not gated): one short main-written retro (what was done, honest misses), surfaced to the user. A separate `session-reflection.md` only if the user asks.
+## Skill preference
 
-Forbidden in step 8: `gh pr merge`; un-drafting the PR; `git push --force` (except executing an explicit user-authorized escalation).
+Prefer the installed skill per step; degrade inline if absent, and say so once. Never auto-install.
+
+| Step | Prefer | Else |
+|---|---|---|
+| Clarify spec | `grill-me` / `superpowers:brainstorming` | inline Q&A |
+| Cut design | `razor` | inline scope trim |
+| Workspace | `superpowers:using-git-worktrees` | `git worktree add` / `git checkout -b` |
+| TDD | `superpowers:test-driven-development` | inline test-first |
+| Whitebox | `razor-code` | one cold reviewer subagent with the four cuts inlined |
 
 ## Lean finding
 
-Every critic finding uses this shape. No prose reviews.
+Blackbox returns findings in this shape (razor-code returns its own schema). No prose reviews.
 
 ```yaml
-id:        <critic>-<short-slug>   # stable; reuse the exact id on re-raise
-raised_by: scout | hawk
-severity:  blocker | advisory
-issue:     <=2 sentences
-fix:       <=2 sentences           # optional for advisory
-status:    open | fixed | acked | escalated
-pushback:  0                       # increment on re-raise; 3 → escalate
+id:       <short-slug>
+severity: blocker | advisory
+issue:    <=2 sentences
+fix:      <=2 sentences        # optional for advisory
+status:   open | fixed | acked
 ```
 
-`blocker` must be fixed, critic-accepted, or escalated→user-resolved before ship. `advisory`: Smith acks and decides, no loop. Severity follows behavior, not cost-of-fix or PR scope — silently dropped data, an AC unmet on a required branch, an adjacent regression, and a safety violation at a trust boundary are always `blocker`. `fixed`/`acked` are terminal; `escalated` is terminal only after the user decides.
+Severity follows behavior, not cost-of-fix or PR scope: silently dropped data on any path, an AC unmet on a required branch, an adjacent regression, and a safety violation at a trust boundary are always `blocker`. A `blocker` loops until fixed. An `advisory` is acked and decided without looping.
 
 ## Hard rules
 
-The only unconditional rules.
-
-- Never auto-merge; output a draft PR.
-- Never work on main/master.
-- Scout + Hawk run on every feature; no directive (including a reflection request) waives them.
-- A submission without attached falsifiable test evidence is invalid — not verify-later.
-- Main never edits code/tests in the critique loop; re-dispatch Smith incrementally.
-- The user is sole arbiter of escalations; main packages context, does not decide.
+- One unit per run → one PR. No backlog walking, no dependency graphs.
+- Never main/master. Never merge, never close the issue — output a review-ready PR; the human owns merge + close.
+- No `git commit --amend`, no `git push --force`. Every revision is a new commit.
+- Code is green (full suite passing) before any review runs.
+- Both reviewers return zero blockers before the PR opens; blackbox verifies every AC.
+- Main writes all code; reviewers only review. Reviewers never edit.
