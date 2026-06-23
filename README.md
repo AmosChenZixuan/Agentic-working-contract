@@ -49,6 +49,9 @@ Installable via the harness (`INSTALL.md`). Cross-agent.
 | `web-design-engineer` | production frontend design |
 | `neat-freak` | end-of-session knowledge cleanup |
 | `humanizer` | remove AI writing patterns |
+| `handoff` | compact the conversation into a handoff doc for another agent |
+| `teach` | teach a skill or concept across sessions, using the current dir as state |
+| `ponytail` | flag & reduce over-engineering in diffs and repos |
 
 ---
 
@@ -64,6 +67,10 @@ Installable via the harness (`INSTALL.md`)
 | `pr-review-toolkit` | comprehensive PR review using specialized agents |
 | `chrome-devtools-mcp` | Chrome DevTools via MCP for debugging and browser automation |
 | `claude-hud` | statusline for Claude Code |
+| `claude-md-management` | audit & maintain CLAUDE.md files |
+| `commit-commands` | git commit / push / PR commands |
+| `context7` | up-to-date library docs via MCP |
+| `skill-creator` | create, edit, and eval skills |
 
 ---
 
