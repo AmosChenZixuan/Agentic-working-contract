@@ -4,7 +4,7 @@ Personal skills collection for AI coding agents. Built for **Claude Code**, also
 
 ## Install
 
-**All agents (recommended):**
+**AWC's bundled skills (recommended):**
 
 ```bash
 npx skills add AmosChenZixuan/Agentic-working-contract -g -y
@@ -12,67 +12,20 @@ npx skills add AmosChenZixuan/Agentic-working-contract -g -y
 
 Bare skill names (`/shipit`), works cross-platform, tracks updates via `npx skills update`.
 
-**Manual (any agent):**
+**Third-party skills or plugins:**
 
-```bash
-git clone https://github.com/AmosChenZixuan/Agentic-working-contract /tmp/awc
-cp -r /tmp/awc/skills/* ~/.agent/skills/
+Tell your agent:
+
+```
+read https://github.com/AmosChenZixuan/Agentic-working-contract/blob/main/INSTALL.md and follow it
 ```
 
-### Install third-party skills
-After install, tell your agent:
-```
-read https://github.com/AmosChenZixuan/Agentic-working-contract/blob/main/README.md and install the third-party skills
-```
+The harness walks you through picking skills (superpowers, caveman, etc.) and Claude plugins (feature-dev, claude-hud, etc.) and installs only what you choose.
 
 ---
 
-## For agents reading this
+## Bundled skills
 
-You just installed a set of slash-command skills. Now do the following:
-
-1. **Confirm local skills are available.** Run `/shipit --help` or equivalent.
-
-2. **Check what's already installed.** Run `npx skills ls` and `npx skills ls -g`, scan both `.agent/skills/` and `~/.agent/skills/`. Remove any already-installed skills from the checklist below — don't ask the human about things they already have.
-
-3. **Present an interactive checklist** (max 4 options per question — split into more questions if needed).
-   Use your platform's Q&A tool: Claude Code → `AskUserQuestion` (multiSelect: true), OpenCode → `question`, Hermes → `clarify`.
-   If no Q&A tool, post as markdown and ask the human to reply.
-
-   For each skill the human picks, determine install scope:
-   - **Has per-agent native install** — check the upstream install guide, then
-     detect the current agent and use its native path
-     (e.g. `claude plugin install` for Claude Code, `npx skills add -a cursor` for Cursor).
-     If native path unavailable, ask: "install globally (all projects) or per-project (this directory only)?"
-   - **npx-only** — no marketplace, only `npx skills add` or file copy.
-     Ask the human: "install globally (-g, all projects) or per-project (current directory only)?"
-
-   **Question 1 — Workflow & output:**
-   - superpowers — brainstorming, TDD, debugging
-     guide: https://github.com/obra/superpowers/blob/main/README.md
-   - caveman — ultra-compressed output
-     guide: https://github.com/JuliusBrussee/caveman/blob/main/INSTALL.md
-   - web-design-engineer — production frontend design
-     guide: https://github.com/ConardLi/garden-skills/blob/main/README.md
-
-   **Question 2 — Cleanup & style:**
-   - neat-freak — end-of-session knowledge cleanup
-     guide: https://github.com/KKKKhazix/khazix-skills/blob/main/README.md
-   - humanizer — remove AI writing patterns
-     guide: https://github.com/blader/humanizer/blob/main/README.md
-
-4. Install only the skills the human picked, using the scope they chose.
-
-5. **Tell the human how to update:**
-   - **npx-installed skills:** `npx skills ls` (per-project) / `npx skills ls -g` (global) to check; `npx skills update` to update all
-   - **Per-agent native install** (e.g. `claude plugin install`): use that agent's native update mechanism — run `claude plugin update`, check the upstream guide, or re-run the install command
-   - When in doubt, re-run the original install command for that skill
-
----
-
-## Local skills
-
-All invoked as slash commands. Skills are auto-discovered from the `skills/` directory.
 
 | Skill | What it does |
 |-------|-------------|
@@ -82,6 +35,35 @@ All invoked as slash commands. Skills are auto-discovered from the `skills/` dir
 | `/clear-issues` | Autonomous issue lifecycle: investigate → implement → review → merge |
 | `/c-simplify` | Review changed code for reuse, quality, efficiency; fix issues |
 | `/coderabbit-review` | Run CodeRabbit AI review from the terminal |
+
+---
+
+## Third-party skills
+
+Installable via the harness (`INSTALL.md`). Cross-agent.
+
+| Skill | What it does |
+|-------|-------------|
+| `superpowers` | brainstorming, TDD, debugging |
+| `caveman` | ultra-compressed output |
+| `web-design-engineer` | production frontend design |
+| `neat-freak` | end-of-session knowledge cleanup |
+| `humanizer` | remove AI writing patterns |
+
+---
+
+## Plugins
+
+Installable via the harness (`INSTALL.md`)
+
+### Claude Code
+
+| Plugin | What it does |
+|--------|-------------|
+| `feature-dev` | guided feature development with codebase understanding |
+| `pr-review-toolkit` | comprehensive PR review using specialized agents |
+| `chrome-devtools-mcp` | Chrome DevTools via MCP for debugging and browser automation |
+| `claude-hud` | statusline for Claude Code |
 
 ---
 

@@ -1,0 +1,27 @@
+skills:
+  - name: superpowers
+    description: brainstorming, TDD, debugging
+    upstream_guide: https://github.com/obra/superpowers/blob/main/README.md
+  - name: caveman
+    description: ultra-compressed output
+    upstream_guide: https://github.com/JuliusBrussee/caveman/blob/main/INSTALL.md
+  - name: web-design-engineer
+    description: production frontend design
+    upstream_guide: https://github.com/ConardLi/garden-skills/blob/main/README.md
+  - name: neat-freak
+    description: end-of-session knowledge cleanup
+    upstream_guide: https://github.com/KKKKhazix/khazix-skills/blob/main/README.md
+  - name: humanizer
+    description: remove AI writing patterns
+    upstream_guide: https://github.com/blader/humanizer/blob/main/README.md
+
+plugins:
+  claude:
+    - name: feature-dev
+      description: guided feature development with codebase understanding
+    - name: pr-review-toolkit
+      description: comprehensive PR review using specialized agents
+    - name: chrome-devtools-mcp
+      description: Chrome DevTools via MCP for debugging and browser automation
+    - name: claude-hud
+      description: statusline for Claude Code
