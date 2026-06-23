@@ -37,7 +37,7 @@ Smith's initial context ≤ ~60k tokens. If the diff likely exceeds ~800 LOC or 
 | Plan | `superpowers:writing-plans` | inline slice list |
 | Smith impl | `superpowers:test-driven-development` + `superpowers:verification-before-completion` | inline TDD + verify |
 | Workspace | `superpowers:using-git-worktrees` | `git worktree add` / `git checkout -b` |
-| Hawk review | platform `/review` | `c-simplify` / inline |
+| Hawk review | platform `/review` | inline |
 | Cleanup | `neat-freak` | inline doc/memory update |
 | Commit msg | `caveman:caveman-commit` | inline Conventional Commits |
 

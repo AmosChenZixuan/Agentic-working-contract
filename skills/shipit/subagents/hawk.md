@@ -16,7 +16,7 @@ Smith's verified diff; surrounding code, callers, related tests; the `status.yam
 
 ## Tool
 
-Prefer platform-native PR review (Claude Code: `/review`); else `c-simplify`; else inline heuristics. Run the tool first, then apply the heuristics to catch what it missed.
+Prefer platform-native PR review (Claude Code: `/review`); else inline heuristics. Run the tool first, then apply the heuristics to catch what it missed.
 
 ## What to flag
 

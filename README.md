@@ -33,7 +33,7 @@ The harness walks you through picking skills (superpowers, caveman, etc.) and Cl
 | `/grill-me` | Challenge your idea with design-decision questions |
 | `/to-issues` | Convert specs or findings into agent-ready GitHub issues |
 | `/clear-issues` | Autonomous issue lifecycle: investigate → implement → review → merge |
-| `/c-simplify` | Review changed code for reuse, quality, efficiency; fix issues |
+| `/razor` | Guard a design before building — reconstructs the user's true need (≠ what they asked for), derives the smallest design that meets it, and names the rest as over-design. Pre-implementation only |
 | `/coderabbit-review` | Run CodeRabbit AI review from the terminal |
 
 ---
@@ -117,4 +117,4 @@ File-based, **heavier** — more constraints, higher token consumption. Use only
 | Team, async handoff, audit trail | Issue-Driven Flow |
 | Problem space is wide open, need creative exploration | Superpower Flow |
 | Concrete bug fix or small feature | `/shipit` (still — it handles trivial features too, just lighter critique) |
-| Just want code reviewed | `/c-simplify` |
+| Worried a design is overkill before building | `/razor` |
