@@ -1,8 +1,6 @@
 ---
 name: shipit
 description: Use when delivering one agent-ready unit of work end-to-end into a review-ready PR. Triggers on "/shipit", "ship this", "ship this issue/spec", or any request to take a single feature/bug/refactor from spec through a reviewed, review-ready pull request. Takes ONE agent-ready unit (a GitHub issue, a spec, or a clear request) and produces ONE non-draft PR a human can review and merge. The final stage of the AWC chain: grill-me → to-issues → shipit. Not for clearing a backlog (shipit handles one unit per run) and not for merging (the human owns merge + close).
-metadata:
-  version: 1.0.0
 ---
 
 # shipit
