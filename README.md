@@ -12,15 +12,6 @@ npx skills add AmosChenZixuan/Agentic-working-contract -g -y
 
 Bare skill names (`/shipit`), works cross-platform, tracks updates via `npx skills update`.
 
-**Claude Code only (marketplace):**
-
-```bash
-claude plugin marketplace add AmosChenZixuan/Agentic-working-contract
-claude plugin install awc
-```
-
-Note: marketplace adds a `/awc:` prefix to skill names.
-
 **Manual (any agent):**
 
 ```bash
