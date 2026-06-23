@@ -29,7 +29,7 @@ The harness walks you through picking skills (superpowers, caveman, etc.) and Cl
 
 | Skill | What it does |
 |-------|-------------|
-| `/shipit` | Take one agent-ready unit → a review-ready PR. Main agent plans, codes, and commits on a worktree or feature branch; reviews each revision through a sequential whitebox (`razor-code`) then blackbox (live smoke / visual) loop until clean; opens a non-draft PR with a reflection comment. One unit per run; never merges — the human reviews and merges |
+| `/shipit` | Take one agent-ready unit → a review-ready PR. Main agent plans, codes, and commits on a worktree or feature branch; reviews in two phases — get it right (blackbox AC verification), then make it lean (`razor-code`) — until clean; opens a non-draft PR with a reflection comment. One unit per run; never merges — the human reviews and merges |
 | `/grill-me` | Challenge your idea with design-decision questions |
 | `/to-issues` | Convert specs or findings into agent-ready GitHub issues |
 | `/razor` | Guard a design before building — reconstructs the user's true need (≠ what they asked for), derives the smallest design that meets it, and names the rest as over-design. Pre-implementation only |
@@ -85,7 +85,7 @@ The backbone of the contract. Sharpen the idea into design decisions, file it as
 
 - **`/grill-me`** — pressure-test the idea one decision at a time until the goal is fully resolved.
 - **`/to-issues`** — turn the resolved spec (or a conversation) into agent-ready GitHub issues: spikes, epics, and 1:1-with-a-PR issues.
-- **`/shipit`** — take **one** agent-ready unit and deliver **one** review-ready PR. The main agent plans, codes, and commits (incremental, never amended) on a worktree or feature branch — never on `main`. Each revision runs a sequential review loop: whitebox (`razor-code`) clears, then blackbox (live smoke / visual, only when an AC needs the feature running). The loop repeats until both reviewers return zero blockers, then shipit opens a non-draft PR and posts a session reflection as a comment. It never merges and never closes the issue — the human reviews, merges, and closes.
+- **`/shipit`** — take **one** agent-ready unit and deliver **one** review-ready PR. The main agent plans, codes, and commits (incremental, never amended) on a worktree or feature branch — never on `main`. Review runs in two phases: get it **right** first (blackbox AC verification, looping on correctness fixes), then make it **lean** (`razor-code`, once on the settled diff, with a targeted re-verify of any AC whose code it cut). The loop exits when both reviewers return zero blockers, then shipit opens a non-draft PR and posts a session reflection as a comment. It never merges and never closes the issue — the human reviews, merges, and closes.
 
 Each link stands alone: `/shipit` takes any agent-ready spec or clear request, building one inline (`grill-me` → spec → `razor`) if it isn't ready yet.
 

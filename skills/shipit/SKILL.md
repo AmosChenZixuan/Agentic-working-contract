@@ -28,15 +28,23 @@ Never work on main/master — refuse and prompt. Honor a workspace mode the user
 
 `razor` the approach (skip if step 1 already razored a fresh spec), then plan the work as TDD slices: for each AC branch, the failing test that pins it, then the minimal code to pass it. Keep the plan to the smallest set of slices the AC forces.
 
-### 4. The loop — code, then review, until clean
+### 4. The loop — right, then lean
 
-Main holds full context end-to-end and writes all code. Reviewers are subagents and never edit; they return findings, main fixes. Stages run **sequentially** — whitebox fully clears before blackbox starts.
+Main holds full context end-to-end and writes all code. Reviewers are subagents and never edit; they return findings, main fixes. The two reviewers sit on different axes — blackbox checks **correctness**, whitebox (`razor-code`) checks **leanness** — so they run as two phases, not one interleaved loop: get it right first, then make it lean. Don't polish code that's still wrong, and don't re-run the costly leanness pass on every correctness fix.
 
-1. **Code** (main). Write the failing tests for the slice, then the minimal implementation, then run the full suite green (the test command comes from the repo — CI config or package scripts). Commit. Commits are **incremental and never amended** — every revision is a new commit, so the trail is fully traceable. A revision with no passing test run is not done.
-2. **Whitebox** — invoke `razor-code` on the diff. It dispatches its own cold-eyes reviewers and returns findings. Apply safe cuts; any blocker → back to step 1.
-3. **Blackbox** — the AC verifier (`subagents/blackbox.md`). It walks the **full AC checklist** and confirms each from outside, picking the method per AC: live smoke / visual via MCP + screenshots where the AC is about a rendered or interactive surface, otherwise curl / shell / the test runner / output inspection. It runs on every feature — any spec has at least one AC. Any blocker → back to step 1.
+**Phase 1 — Right (correctness). No whitebox here.**
 
-Any code change re-enters at whitebox (re-run whitebox, then blackbox) — scope each re-run to the **incremental diff since the last clear**, not the whole PR, to keep the loop cheap. The loop exits only when whitebox returns zero blockers **and** blackbox confirms every AC with zero blockers. No iteration cap and no mid-loop escalation — the human's gate is the PR review.
+1. **Code** (main). Per slice: write the failing test, then the minimal implementation, then run the full suite green (test command comes from the repo — CI config or package scripts). Commit. Commits are **incremental and never amended** — every revision is a new commit, so the trail is fully traceable. A revision with no passing test run is not done.
+2. **Blackbox** — the AC verifier (`subagents/blackbox.md`), once the slices are in. It walks the **full AC checklist** and confirms each from outside, picking the method per AC: live smoke / visual via MCP + screenshots where the AC is about a rendered or interactive surface, otherwise curl / shell / the test runner / output inspection. Any blocker → fix it as a new slice (suite green, commit), then re-blackbox the affected AC.
+
+Phase 1 is done when blackbox confirms **every** AC.
+
+**Phase 2 — Lean (leanness). Whitebox runs once.**
+
+3. **Whitebox** — invoke `razor-code` on the full settled diff. It dispatches its own cold-eyes reviewers and returns findings. Apply safe cuts; commit.
+4. **Re-verify** — re-blackbox **only the ACs whose code the cuts touched**. razor-code holds behavior sacred, but the guarantee can slip (e.g. a cut guard), so this targeted re-verify is required, not optional. A whitebox blocker that needs a real change → fix it, re-cut, re-verify the touched ACs.
+
+The loop exits when whitebox returns zero blockers **and** every AC is confirmed. razor-code fires once — twice only if a blocker forces a structural change. No iteration cap, no mid-loop escalation — the human's gate is the PR review.
 
 Whitebox (`razor-code`) reviews for leanness, not correctness — it holds behavior sacred and won't hunt bugs. Inside shipit, correctness is guarded by **blackbox's AC verification**: does the feature actually do what each AC says, on every required branch. Deeper adversarial bug-hunting is intentionally **post-shipit** — a human, or review agents, run against the review-ready PR. shipit's job is to produce a PR worth reviewing, not to be the last line of defense.
 
@@ -68,7 +76,7 @@ fix:      <=2 sentences        # optional for advisory
 status:   open | fixed | acked
 ```
 
-Severity follows behavior, not cost-of-fix or PR scope: silently dropped data on any path, an AC unmet on a required branch, an adjacent regression, and a safety violation at a trust boundary are always `blocker`. A `blocker` loops until fixed. An `advisory` is acked and decided without looping.
+Severity follows behavior, not cost-of-fix or PR scope: silently dropped data on any path, an AC unmet on a required branch, an adjacent regression, and a safety violation at a trust boundary are always `blocker`. A test whose runtime or setup cost is disproportionate to its coverage is also a `blocker` — resolve by cutting the cost (hoist a shared/module-scoped fixture, parametrize, shrink the payload), never by deleting the sole verifier of an AC. A `blocker` loops until fixed. An `advisory` is acked and decided without looping.
 
 ## Hard rules
 
