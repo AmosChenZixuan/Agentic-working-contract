@@ -20,6 +20,8 @@ If it isn't agent-ready, build it inline: invoke `grill-me` to clarify the gaps,
 
 Then normalize the AC — **whatever the source**, a ready issue needs this too. Each AC gets a stable id (`AC1`…), names its required branches (`happy`, plus `empty`/`error` where a negative path exists), and states an outcome **observable from outside the code** — a returned value, an HTTP response, a rendered screen, a CLI exit — so the blackbox reviewer can verify it in step 4. At least one AC; none may read "works correctly".
 
+Each AC must also be **verifiable in this environment**. Rewrite any machine- or resource-bound threshold into a machine-independent observable (`suite ≤ 8.5s on my laptop` → `test X runs in < 1s, ~50× faster than the rest of the file`). If an AC genuinely needs a resource the agent can't reach here — a live external model, specific hardware — it must **not** silently degrade to an "out-of-band checklist". Split it: the strongest proxy the agent *can* run (the real parse / retry / render path, not a mock) **plus** a named residual the reflection flags as **UNVERIFIED**, risk stated plainly.
+
 ### 2. Workspace
 
 Never work on main/master — refuse and prompt. Honor a workspace mode the user already stated; otherwise ask `[branch / worktree]`, never a silent default. `branch` → `git checkout -b <slug>` (slug from the goal) from the repo's main ref. `worktree` → `superpowers:using-git-worktrees` if available, else `git worktree add`. `cd` in, then write the resolved spec to `spec.md` here — the only state shipit keeps on disk; it becomes the PR body.
@@ -50,7 +52,7 @@ Whitebox (`razor-code`) reviews for leanness, not correctness — it holds behav
 
 ### 5. PR + handoff
 
-Push, then `gh pr create` (**not** a draft — the reviewers already passed; title per repo convention). Body = the spec + a one-line whitebox summary + the blackbox AC report + the finding log; add `Closes #NN` if the unit was a GitHub issue. Post the **session reflection as a PR comment** (what was built, honest misses, anything the reviewer should look at hardest). Report `REVIEW-READY @ <url>`. The human reviews, merges, and closes.
+Push, then `gh pr create` (**not** a draft — the reviewers already passed; title per repo convention). Body = the spec + a one-line whitebox summary + the blackbox AC report + the finding log; add `Closes #NN` if the unit was a GitHub issue. Post the **session reflection as a PR comment** (what was built, honest misses, anything the reviewer should look at hardest). The reflection must flag any **UNVERIFIED** AC residual (step 1), and name any sibling site that shares a fixed bug's shape — surfaced for the human, not filed or fixed here (shipit ships one unit). Report `REVIEW-READY @ <url>`. The human reviews, merges, and closes.
 
 ## Skill preference
 

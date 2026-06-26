@@ -59,6 +59,7 @@ How the work is verified:
 What is explicitly NOT part of this issue. List related-but-deferred work to discourage bundling and to set reviewer expectations. Each deferred item is a separate issue.
 
 ## Acceptance
+Each criterion must be checkable by **running the project** — its tests, or its app driven from outside (curl, CLI, or the UI via a browser MCP screenshot). Don't write one that hangs on what the project can't reproduce: an external third-party service, one machine's timing, a subjective human eye. Rewrite the threshold (`≤8.5s on my machine` → `test X < 1s`), or split it into an in-project proxy plus a residual marked for human verification.
 - [ ] [Objectively verifiable criterion — observable behavior, not "works correctly"]
 - [ ] [Objectively verifiable criterion]
 - [ ] [Tests added or updated per Test strategy]

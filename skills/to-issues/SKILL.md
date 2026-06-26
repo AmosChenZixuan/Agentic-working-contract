@@ -33,7 +33,7 @@ Before drafting Scope, scan the real files the work touches so issues name actua
 
 Freeze before any `gh issue create`:
 
-- **Spec** — Goal, Scope (real files / types / APIs), Out of scope, Acceptance (objectively verifiable, never "works correctly").
+- **Spec** — Goal, Scope (real files / types / APIs), Out of scope, Acceptance (verifiable by exercising the project — its tests or its runnable app/UI, incl. MCP smoke; never "works correctly" nor hung on an external service, one machine's timing, or subjective human judgment — see `references/issue.md`).
 - **Dependencies** — every `Depends on: #NN` edge resolves to a real issue number, not a placeholder.
 
 If the spec is still moving, file a spike — not a moving issue. Changes after filing are a new issue or an explicit amend, not a silent edit.

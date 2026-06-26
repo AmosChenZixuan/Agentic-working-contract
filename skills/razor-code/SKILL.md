@@ -61,7 +61,11 @@ invariant, a deliberate trade-off.
 **4. Tests.** Cut tests that earn nothing: boilerplate scaffolding, duplicate
 cases over the same path, trivial getter/setter checks, and tests coupled to
 implementation detail that break on a safe refactor rather than on a behavior
-change. Keep — and flag if *missing* — the tests that catch real regressions:
+change. Before calling a test a duplicate, confirm the test you credit as
+"already covering it" hits the **same branch and inputs** — calling the same
+function is not the same path. A sibling using different inputs (distinct
+timestamps where this one pins a collision) isn't covering it; this test is the
+sole verifier of its path — keep it. Keep — and flag if *missing* — the tests that catch real regressions:
 behavior, contracts, edge and error paths. Weigh **cost** too: a test whose
 runtime or setup is disproportionate to what it covers is a liability even when
 green. If it's also low-value → cut it. If it's the only thing covering a real
