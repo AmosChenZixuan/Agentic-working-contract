@@ -24,7 +24,7 @@ Each AC must also be **verifiable in this environment**. Rewrite any machine- or
 
 ### 2. Workspace
 
-Never work on main/master — refuse and prompt. Honor a workspace mode the user already stated; otherwise ask `[branch / worktree]`, never a silent default. `branch` → `git checkout -b <slug>` (slug from the goal) from the repo's main ref. `worktree` → `superpowers:using-git-worktrees` if available, else `git worktree add`. `cd` in, then write the resolved spec to `spec.md` here — the only state shipit keeps on disk; it becomes the PR body.
+Never work on main/master — refuse and prompt. Honor a workspace mode the user already stated; otherwise ask `[branch / worktree]`, never a silent default. `branch` → `git checkout -b <slug>` (slug from the goal) from the repo's main ref. `worktree` → `superpowers:using-git-worktrees` if available, else `git worktree add`. `cd` in, then write the resolved spec **outside the repo tree** to `$SPEC` — a user-named temp dir if one's given (CLAUDE.md or this session, `~` expanded), else `${TMPDIR:-${TMP:-${TEMP:-/tmp}}}` — named `shipit-spec-<slug>.md`. It's the only state shipit keeps on disk and becomes the PR body (deleted in step 5). Keep it out of the repo: a tracked path gets swept into commits by `git add`.
 
 ### 3. Plan
 
@@ -52,7 +52,7 @@ Whitebox (`razor-code`) reviews for leanness, not correctness — it holds behav
 
 ### 5. PR + handoff
 
-Push, then `gh pr create` (**not** a draft — the reviewers already passed; title per repo convention). Body = the spec + a one-line whitebox summary + the blackbox AC report + the finding log; add `Closes #NN` if the unit was a GitHub issue. Post the **session reflection as a PR comment** (what was built, honest misses, anything the reviewer should look at hardest). The reflection must flag any **UNVERIFIED** AC residual (step 1), and name any sibling site that shares a fixed bug's shape — surfaced for the human, not filed or fixed here (shipit ships one unit). Report `REVIEW-READY @ <url>`. The human reviews, merges, and closes.
+Push, then `gh pr create` (**not** a draft — the reviewers already passed; title per repo convention). Body = the spec + a one-line whitebox summary + the blackbox AC report + the finding log; add `Closes #NN` if the unit was a GitHub issue. Post the **session reflection as a PR comment** (what was built, honest misses, anything the reviewer should look at hardest). The reflection must flag any **UNVERIFIED** AC residual (step 1), and name any sibling site that shares a fixed bug's shape — surfaced for the human, not filed or fixed here (shipit ships one unit). Then delete the temp spec file (`rm "$SPEC"`). Report `REVIEW-READY @ <url>`. The human reviews, merges, and closes.
 
 ## Skill preference
 
