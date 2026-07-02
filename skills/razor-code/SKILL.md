@@ -1,5 +1,7 @@
 ---
 name: razor-code
+disable-model-invocation: true
+argument-hint: "[<omit for current diff, or a PR #>]"
 description: >
   Cut cruft from code that already exists. Use after an implementation, diff, or
   PR is written and you want it leaner — when reviewing changes, or asked to

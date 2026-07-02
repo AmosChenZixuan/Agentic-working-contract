@@ -1,5 +1,6 @@
 ---
 name: razor
+disable-model-invocation: true
 description: >
   Strip a design down to the essential, before any code is written. Use whenever
   a feature, approach, architecture, or spec is being proposed or debated and not

@@ -2,7 +2,7 @@
 name: wdym
 description: Reframe the previous answer so it lands — plain, distilled, at the reader's level. User-invoked only.
 disable-model-invocation: true
-argument-hint: [tldr = too long; didn't read | eli5 = explain like I'm 5 | in <language>]
+argument-hint: "[tldr = too long; didn't read | eli5 = explain like I'm 5 | in <language>]"
 ---
 
 Someone read the last answer and thought *"wait — what do you mean?"*

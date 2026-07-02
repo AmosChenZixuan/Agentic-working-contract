@@ -1,5 +1,6 @@
 ---
 name: grill-me
+disable-model-invocation: true
 description: Use when the user wants their idea, plan, or decision rigorously challenged — not just explained. Trigger on "grill me", "challenge me on this", "push back on my idea", "stress test my thinking", or any plan/decision presented with overconfident framing that the user wants questioned. Walks a decision tree one question at a time with tradeoff analysis and a recommendation, until the goal is fully clarified.
 ---
 
