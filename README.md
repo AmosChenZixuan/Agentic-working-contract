@@ -34,6 +34,7 @@ The harness walks you through picking skills (superpowers, caveman, etc.) and Cl
 | `/to-issues` | Convert specs or findings into agent-ready GitHub issues |
 | `/razor` | Guard a design before building — reconstructs the user's true need (≠ what they asked for), derives the smallest design that meets it, and names the rest as over-design. Pre-implementation only |
 | `/razor-code` | Cut cruft from code already written — flags over-engineering, needless complexity & duplication, dead-weight comments, and low-value tests, while keeping what protects correctness & safety. Post-implementation counterpart to `/razor` |
+| `/wdym` | *"What do you mean?"* Reframe your previous answer so it lands — when one came out confusing, dense, or too technical, so the reader gets the idea faster. Gauges the reader's level from the session, picks the technique that fits (reorganize, analogy, or a visual), and distills to the point without changing any claim. User-invoked only; pass `tldr` (short, keep terms), `eli5` (no jargon, use analogy), or `in <language>` |
 
 ---
 
