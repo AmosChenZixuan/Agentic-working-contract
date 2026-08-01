@@ -20,6 +20,8 @@ A unit is **agent-ready** when it states: a single goal, scope (in / out), the f
 
 If it isn't agent-ready, build it inline: invoke `grill-me` to clarify the gaps, draft the spec, then invoke `razor` to cut it to the smallest design that meets the real need.
 
+**Re-derive the spec's factual premises before planning.** Every claim the work rests on — a file is committed, a path exists, a count, a command currently passes — gets confirmed with the command that actually answers it (`git ls-files`, not `ls`) against the branch, not the working tree. A wrong premise silently redefines the unit: implementing the issue as written is what turns CI red. Contradictions go in the PR body, not a fix smuggled into the diff.
+
 Then normalize the AC — **whatever the source**, a ready issue needs this too. Each AC gets a stable id (`AC1`…), names its required branches (`happy`, plus `empty`/`error` where a negative path exists), and states an outcome **observable from outside the code** — a returned value, an HTTP response, a rendered screen, a CLI exit — so the blackbox reviewer can verify it in step 4. At least one AC; none may read "works correctly".
 
 Each AC must also be **verifiable in this environment**. Rewrite any machine- or resource-bound threshold into a machine-independent observable (`suite ≤ 8.5s on my laptop` → `test X runs in < 1s, ~50× faster than the rest of the file`). If an AC genuinely needs a resource the agent can't reach here — a live external model, specific hardware — it must **not** silently degrade to an "out-of-band checklist". Split it: the strongest proxy the agent *can* run (the real parse / retry / render path, not a mock) **plus** a named residual the reflection flags as **UNVERIFIED**, risk stated plainly.
@@ -38,7 +40,7 @@ Main holds full context end-to-end and writes all code. Reviewers are subagents 
 
 **Phase 1 — Right (correctness). No whitebox here.**
 
-1. **Code** (main). Per slice: write the failing test, then the minimal implementation, then run the full suite green (test command comes from the repo — CI config or package scripts). Commit. Commits are **incremental and never amended** — every revision is a new commit, so the trail is fully traceable. A revision with no passing test run is not done.
+1. **Code** (main). Per slice: write the failing test, then the minimal implementation, then run the full suite green (test command comes from the repo — CI config or package scripts). Commit. Commits are **incremental and never amended** — every revision is a new commit, so the trail is fully traceable. A revision with no passing test run is not done. A test pinning a fix must be shown failing against the pre-fix source; where that failure depends on a nondeterministic input (hash seed, ordering, concurrency), sweep the range rather than sampling a few values — a test whose discriminating power is luck reads as coverage while providing none.
 2. **Blackbox** — the AC verifier (`subagents/blackbox.md`), once the slices are in. It walks the **full AC checklist** and confirms each from outside, picking the method per AC: live smoke / visual via MCP + screenshots where the AC is about a rendered or interactive surface, otherwise curl / shell / the test runner / output inspection. Any blocker → fix it as a new slice (suite green, commit), then re-blackbox the affected AC.
 
 Phase 1 is done when blackbox confirms **every** AC.
