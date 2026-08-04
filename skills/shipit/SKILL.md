@@ -36,7 +36,7 @@ Never work on main/master — refuse and prompt. Honor a workspace mode the user
 
 ### 4. The loop — right, then lean
 
-Main holds full context end-to-end and writes all code. Reviewers are subagents and never edit; they return findings, main fixes. The two reviewers sit on different axes — blackbox checks **correctness**, whitebox (`razor-code`) checks **leanness** — so they run as two phases, not one interleaved loop: get it right first, then make it lean. Don't polish code that's still wrong, and don't re-run the costly leanness pass on every correctness fix.
+Main holds full context end-to-end and writes all code. Reviewers are subagents and never edit; they return findings, main fixes. The two reviewers sit on different axes — blackbox checks **correctness**, whitebox (`razor-code`) checks **leanness** — and differ in kind: blackbox returns a per-AC verdict that can close, razor-code a list of proposals that never can, so it informs the loop rather than gating it. They run as two phases, not one interleaved loop: get it right first, then make it lean. Don't polish code that's still wrong, and don't re-run the costly leanness pass on every correctness fix.
 
 **Phase 1 — Right (correctness). No whitebox here.**
 
@@ -48,11 +48,11 @@ Phase 1 is done when blackbox confirms **every** AC.
 **Phase 2 — Lean (leanness). Whitebox runs once.**
 
 3. **Whitebox** — invoke `razor-code` on the full settled diff. It dispatches its own cold-eyes reviewers and returns findings — proposals, not decisions. Dispatched cold, those reviewers cannot see the unit's ask, so `safe` is not `approved`. Apply the safe cuts that fall inside the ask; commit.
-4. **Re-verify** — re-blackbox **only the ACs whose code the cuts touched**. razor-code holds behavior sacred, but the guarantee can slip (e.g. a cut guard), so this targeted re-verify is required, not optional. A whitebox blocker that needs a real change → fix it, re-cut, re-verify the touched ACs.
+4. **Re-verify** — re-blackbox **only the ACs whose code the cuts touched**. razor-code holds behavior sacred, but the guarantee can slip (e.g. a cut guard), so this targeted re-verify is required, not optional. A **Gap** razor-code reports on an AC branch is not a cut but a correctness hole blackbox missed: fix it as a Phase 1 slice, then re-verify that AC.
 
-The loop exits when whitebox returns zero blockers **and** every AC is confirmed. razor-code fires once — twice only if a blocker forces a structural change. No iteration cap, no mid-loop escalation — the human's gate is the PR review.
+The loop exits when every AC is confirmed **and** every razor-code finding is dispositioned — applied, or logged with the reason it wasn't. razor-code fires once — twice only if a Gap forces a structural change. No iteration cap, no mid-loop escalation — the human's gate is the PR review.
 
-Whitebox (`razor-code`) reviews for leanness, not correctness — it holds behavior sacred and won't hunt bugs. Inside shipit, correctness is guarded by **blackbox's AC verification**: does the feature actually do what each AC says, on every required branch. Deeper adversarial bug-hunting is intentionally **post-shipit** — a human, or review agents, run against the review-ready PR. shipit's job is to produce a PR worth reviewing, not to be the last line of defense.
+Correctness inside shipit is guarded by **blackbox's AC verification** alone: does the feature actually do what each AC says, on every required branch. Deeper adversarial bug-hunting is intentionally **post-shipit** — a human, or review agents, run against the review-ready PR. shipit's job is to produce a PR worth reviewing, not to be the last line of defense.
 
 ### 5. PR + handoff
 
@@ -90,5 +90,5 @@ Severity follows behavior, not cost-of-fix or PR scope: silently dropped data on
 - Never main/master. Never merge, never close the issue — output a review-ready PR; the human owns merge + close.
 - No `git commit --amend`, no `git push --force`. Every revision is a new commit.
 - Code is green (full suite passing) before any review runs.
-- Both reviewers return zero blockers before the PR opens; blackbox verifies every AC.
+- Blackbox verifies every AC before the PR opens; every razor-code finding is applied or logged.
 - Main writes all code; reviewers only review. Reviewers never edit.
