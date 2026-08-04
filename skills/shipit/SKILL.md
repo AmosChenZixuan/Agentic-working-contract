@@ -8,7 +8,7 @@ description: >
 
 # shipit
 
-Take **one agent-ready unit** → ship **one review-ready PR**. The main agent plans, codes, and commits; it spawns reviewer subagents only. It never merges and never closes the issue — a human reviews the PR and owns merge + close.
+Take **one agent-ready unit** → ship **one review-ready PR**. Nothing enters the diff the unit didn't ask for — not a premise contradiction (step 1), not a whitebox cut on code the slices merely brushed (step 4), not a sibling site (step 5); each is surfaced for the human, never fixed here. No backlog walking, no dependency graphs. The main agent plans, codes, and commits; it spawns reviewer subagents only. It never merges and never closes the issue — a human reviews the PR and owns merge + close.
 
 The AWC chain is `grill-me → to-issues → shipit`. shipit expects the spec to already be agent-ready; if it isn't, shipit creates one inline (below) rather than refusing.
 
@@ -40,8 +40,8 @@ Main holds full context end-to-end and writes all code. Reviewers are subagents 
 
 **Phase 1 — Right (correctness). No whitebox here.**
 
-1. **Code** (main). Per slice: write the failing test, then the minimal implementation, then run the full suite green (test command comes from the repo — CI config or package scripts). Commit. Commits are **incremental and never amended** — every revision is a new commit, so the trail is fully traceable. A revision with no passing test run is not done. A test pinning a fix must be shown failing against the pre-fix source; where that failure depends on a nondeterministic input (hash seed, ordering, concurrency), sweep the range rather than sampling a few values — a test whose discriminating power is luck reads as coverage while providing none.
-2. **Blackbox** — the AC verifier (`subagents/blackbox.md`), once the slices are in. It walks the **full AC checklist** and confirms each from outside, picking the method per AC: live smoke / visual via MCP + screenshots where the AC is about a rendered or interactive surface, otherwise curl / shell / the test runner / output inspection. Any blocker → fix it as a new slice (suite green, commit), then re-blackbox the affected AC.
+1. **Code** (main). Per slice: write the failing test, then the minimal implementation, then run the full suite green (test command comes from the repo — CI config or package scripts). Commit. Commits are **incremental and never amended** — no `--amend`, no `push --force`, every revision a new commit, so the trail is fully traceable. A revision with no passing test run is not done. A test pinning a fix must be shown failing against the pre-fix source; where that failure depends on a nondeterministic input (hash seed, ordering, concurrency), sweep the range rather than sampling a few values — a test whose discriminating power is luck reads as coverage while providing none.
+2. **Blackbox** — the AC verifier (`subagents/blackbox.md`), once the slices are in and the suite is green. It walks the **full AC checklist** and confirms each from outside, picking the method per AC: live smoke / visual via MCP + screenshots where the AC is about a rendered or interactive surface, otherwise curl / shell / the test runner / output inspection. Any blocker → fix it as a new slice (suite green, commit), then re-blackbox the affected AC.
 
 Phase 1 is done when blackbox confirms **every** AC.
 
@@ -52,7 +52,7 @@ Phase 1 is done when blackbox confirms **every** AC.
 
 The loop exits when every AC is confirmed **and** every razor-code finding is dispositioned — applied, or logged with the reason it wasn't. razor-code fires once — twice only if a Gap forces a structural change. No iteration cap, no mid-loop escalation — the human's gate is the PR review.
 
-Correctness inside shipit is guarded by **blackbox's AC verification** alone: does the feature actually do what each AC says, on every required branch. Deeper adversarial bug-hunting is intentionally **post-shipit** — a human, or review agents, run against the review-ready PR. shipit's job is to produce a PR worth reviewing, not to be the last line of defense.
+Correctness here means **blackbox's AC verification** and nothing more: does the feature do what each AC says, on every required branch. Deeper adversarial bug-hunting is intentionally **post-shipit** — shipit's job is to produce a PR worth reviewing, not to be the last line of defense.
 
 ### 5. PR + handoff
 
@@ -83,12 +83,3 @@ status:   open | fixed | acked
 ```
 
 Severity follows behavior, not cost-of-fix or PR scope: silently dropped data on any path, an AC unmet on a required branch, an adjacent regression, and a safety violation at a trust boundary are always `blocker`. This list is the single source — `subagents/blackbox.md` applies it rather than carrying its own copy. A `blocker` loops until fixed. An `advisory` is acked and decided without looping.
-
-## Hard rules
-
-- One unit per run → one PR. Nothing enters the diff the unit didn't ask for — not a premise contradiction (step 1), not a whitebox cut on code the slices merely brushed (step 4), not a sibling site (step 5). Surface each for the human; never fix it here. No backlog walking, no dependency graphs.
-- Never main/master. Never merge, never close the issue — output a review-ready PR; the human owns merge + close.
-- No `git commit --amend`, no `git push --force`. Every revision is a new commit.
-- Code is green (full suite passing) before any review runs.
-- Blackbox verifies every AC before the PR opens; every razor-code finding is applied or logged.
-- Main writes all code; reviewers only review. Reviewers never edit.
