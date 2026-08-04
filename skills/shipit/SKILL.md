@@ -20,7 +20,7 @@ A unit is **agent-ready** when it states: a single goal, scope (in / out), the f
 
 If it isn't agent-ready, build it inline: invoke `grill-me` to clarify the gaps, draft the spec, then invoke `razor` to cut it to the smallest design that meets the real need.
 
-**Re-derive the spec's factual premises before planning.** Every claim the work rests on — a file is committed, a path exists, a count, a command currently passes — gets confirmed with the command that actually answers it (`git ls-files`, not `ls`) against the branch, not the working tree. A wrong premise silently redefines the unit: implementing the issue as written is what turns CI red. Contradictions go in the PR body, not a fix smuggled into the diff.
+**Re-derive the spec's factual premises before planning.** Every claim the work rests on — a file is committed, a path exists, a count, a command currently passes — gets confirmed with the command that actually answers it (`git ls-files`, not `ls`) against the branch, not the working tree. A wrong premise silently redefines the unit: implementing the issue as written is what turns CI red. Contradictions go in the PR body.
 
 Then normalize the AC — **whatever the source**, a ready issue needs this too. Each AC gets a stable id (`AC1`…), names its required branches (`happy`, plus `empty`/`error` where a negative path exists), and states an outcome **observable from outside the code** — a returned value, an HTTP response, a rendered screen, a CLI exit — so the blackbox reviewer can verify it in step 4. At least one AC; none may read "works correctly".
 
@@ -47,7 +47,7 @@ Phase 1 is done when blackbox confirms **every** AC.
 
 **Phase 2 — Lean (leanness). Whitebox runs once.**
 
-3. **Whitebox** — invoke `razor-code` on the full settled diff. It dispatches its own cold-eyes reviewers and returns findings. Apply safe cuts; commit.
+3. **Whitebox** — invoke `razor-code` on the full settled diff. It dispatches its own cold-eyes reviewers and returns findings — proposals, not decisions. Dispatched cold, those reviewers cannot see the unit's ask, so `safe` is not `approved`. Apply the safe cuts that fall inside the ask; commit.
 4. **Re-verify** — re-blackbox **only the ACs whose code the cuts touched**. razor-code holds behavior sacred, but the guarantee can slip (e.g. a cut guard), so this targeted re-verify is required, not optional. A whitebox blocker that needs a real change → fix it, re-cut, re-verify the touched ACs.
 
 The loop exits when whitebox returns zero blockers **and** every AC is confirmed. razor-code fires once — twice only if a blocker forces a structural change. No iteration cap, no mid-loop escalation — the human's gate is the PR review.
@@ -56,7 +56,7 @@ Whitebox (`razor-code`) reviews for leanness, not correctness — it holds behav
 
 ### 5. PR + handoff
 
-Push, then `gh pr create` (**not** a draft — the reviewers already passed; title per repo convention). Body = the spec + a one-line whitebox summary + the blackbox AC report + the finding log; add `Closes #NN` if the unit was a GitHub issue. Post the **session reflection as a PR comment** (what was built, honest misses, anything the reviewer should look at hardest). The reflection must flag any **UNVERIFIED** AC residual (step 1), and name any sibling site that shares a fixed bug's shape — surfaced for the human, not filed or fixed here (shipit ships one unit). Then delete the temp spec file (`rm "$SPEC"`). Report `REVIEW-READY @ <url>`. The human reviews, merges, and closes.
+Push, then `gh pr create` (**not** a draft — the reviewers already passed; title per repo convention). Body = the spec + a one-line whitebox summary + the blackbox AC report + the finding log; add `Closes #NN` if the unit was a GitHub issue. Post the **session reflection as a PR comment** (what was built, honest misses, anything the reviewer should look at hardest). The reflection must flag any **UNVERIFIED** AC residual (step 1), and name any sibling site that shares a fixed bug's shape — surfaced, not fixed. Then delete the temp spec file (`rm "$SPEC"`). Report `REVIEW-READY @ <url>`. The human reviews, merges, and closes.
 
 ## Skill preference
 
@@ -86,7 +86,7 @@ Severity follows behavior, not cost-of-fix or PR scope: silently dropped data on
 
 ## Hard rules
 
-- One unit per run → one PR. No backlog walking, no dependency graphs.
+- One unit per run → one PR. Nothing enters the diff the unit didn't ask for — not a premise contradiction (step 1), not a whitebox cut on code the slices merely brushed (step 4), not a sibling site (step 5). Surface each for the human; never fix it here. No backlog walking, no dependency graphs.
 - Never main/master. Never merge, never close the issue — output a review-ready PR; the human owns merge + close.
 - No `git commit --amend`, no `git push --force`. Every revision is a new commit.
 - Code is green (full suite passing) before any review runs.

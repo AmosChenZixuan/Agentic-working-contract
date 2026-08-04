@@ -22,11 +22,15 @@ against the impossible, comments that lie or restate, tests that test nothing.
 
 Two non-negotiables:
 
-- **Behavior is sacred.** A clean cut removes code that *cannot* change any
-  output, side effect, or contract — on any path, including edge and error
-  paths. If a cut could alter behavior, it is a regression, not a cut: flag it
-  for explicit sign-off, never present it as safe. Unsure whether a cut is
-  behavior-preserving? Treat it as behavior-affecting.
+- **Behavior is sacred.** A clean cut removes code whose absence *cannot*
+  change any output, side effect, or contract on any path — edge and error
+  included — and that invariance must hold **in place**: established by this
+  file's own logic, its types, or a schema constraint. Invariance that holds
+  only because another module maintains it is not invariance but a dependency;
+  cutting there moves a safety property away from the code that needs it, and a
+  later edit *there* breaks *here* with the suite still green. Whatever you
+  can't establish in place is behavior-affecting: name the invariant as the
+  risk, route it to sign-off, never present it as safe.
 - **Fresh eyes, not the author's.** Reviewers see the code, never the reasoning
   behind it, so cuts aren't rationalized away (the dispatch below is what keeps
   them cold).
