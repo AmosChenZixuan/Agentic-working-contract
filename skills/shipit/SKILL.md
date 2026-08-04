@@ -22,9 +22,9 @@ If it isn't agent-ready, build it inline: invoke `grill-me` to clarify the gaps,
 
 **Re-derive the spec's factual premises before planning.** Every claim the work rests on — a file is committed, a path exists, a count, a command currently passes — gets confirmed with the command that actually answers it (`git ls-files`, not `ls`) against the branch, not the working tree. A wrong premise silently redefines the unit: implementing the issue as written is what turns CI red. Contradictions go in the PR body.
 
-Then normalize the AC — **whatever the source**, a ready issue needs this too. Each AC gets a stable id (`AC1`…), names its required branches (`happy`, plus `empty`/`error` where a negative path exists), and states an outcome **observable from outside the code** — a returned value, an HTTP response, a rendered screen, a CLI exit — so the blackbox reviewer can verify it in step 4. At least one AC; none may read "works correctly".
+Then normalize the AC — **whatever the source**, a ready issue needs this too. Each AC gets a stable id (`AC1`…), names its required branches (`happy`, plus `empty`/`error` where a negative path exists), and states an outcome the blackbox reviewer can **observe from outside the code and reproduce in this environment** — a returned value, an HTTP response, a rendered screen, a CLI exit. At least one AC; none may read "works correctly", and none may rest on a machine- or resource-bound threshold (`suite ≤ 8.5s on my laptop` → `test X runs in < 1s, ~50× faster than the rest of the file`).
 
-Each AC must also be **verifiable in this environment**. Rewrite any machine- or resource-bound threshold into a machine-independent observable (`suite ≤ 8.5s on my laptop` → `test X runs in < 1s, ~50× faster than the rest of the file`). If an AC genuinely needs a resource the agent can't reach here — a live external model, specific hardware — it must **not** silently degrade to an "out-of-band checklist". Split it: the strongest proxy the agent *can* run (the real parse / retry / render path, not a mock) **plus** a named residual the reflection flags as **UNVERIFIED**, risk stated plainly.
+If an AC genuinely needs a resource the agent can't reach here — a live external model, specific hardware — it must **not** silently degrade to an "out-of-band checklist". Split it: the strongest proxy the agent *can* run (the real parse / retry / render path, not a mock) **plus** a named residual the reflection flags as **UNVERIFIED**, risk stated plainly.
 
 ### 2. Workspace
 
@@ -82,7 +82,7 @@ fix:      <=2 sentences        # optional for advisory
 status:   open | fixed | acked
 ```
 
-Severity follows behavior, not cost-of-fix or PR scope: silently dropped data on any path, an AC unmet on a required branch, an adjacent regression, and a safety violation at a trust boundary are always `blocker`. A test whose runtime or setup cost is disproportionate to its coverage is also a `blocker` — resolve by cutting the cost (hoist a shared/module-scoped fixture, parametrize, shrink the payload), never by deleting the sole verifier of an AC. A `blocker` loops until fixed. An `advisory` is acked and decided without looping.
+Severity follows behavior, not cost-of-fix or PR scope: silently dropped data on any path, an AC unmet on a required branch, an adjacent regression, and a safety violation at a trust boundary are always `blocker`. This list is the single source — `subagents/blackbox.md` applies it rather than carrying its own copy. A `blocker` loops until fixed. An `advisory` is acked and decided without looping.
 
 ## Hard rules
 

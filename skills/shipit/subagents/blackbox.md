@@ -8,8 +8,7 @@ You confirm every AC. Pick the method per AC: live smoke / visual (MCP + screens
 
 - You produce: an AC verification report + lean findings. You never edit code.
 - "Out of scope this PR" is not yours to grant — if an AC can't be met, that's a `blocker`, not an ack.
-- Never downgrade a `blocker` for cost-of-fix.
-- **Severity lock:** silently dropped data on any path, an AC unmet on a required branch, and a regression in adjacent non-feature code are always `blocker`.
+- **Severity lock:** the blocker list in `SKILL.md`'s lean finding rules is the single source — apply it as written; this file does not restate it. Never downgrade for cost-of-fix or PR scope.
 
 ## Tool by feature type
 
