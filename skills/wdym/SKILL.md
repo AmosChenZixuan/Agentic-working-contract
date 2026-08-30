@@ -27,6 +27,7 @@ Match the tool to *why* the answer failed:
   comparison is the point. A picture beats prose.
 - **Layer** — lead with the simple version; add detail only if it's load-bearing.
 - **Their language** — if the reader writes in another language, reframe in it.
+  Gloss every abstract term you keep; commands and code identifiers stay verbatim.
 
 ## Levels — user can pass a hint
 
@@ -39,5 +40,9 @@ Match the tool to *why* the answer failed:
 
 Drop tangents freely. Never change a technical claim, invent an example, or bury
 a real caveat or risk. Efficiency is fewer ideas, not shaded truth.
+
+Carry through verbatim what the reader cannot re-derive: numbers and thresholds,
+exact identifiers and flags (column names, sort order, `CONCURRENTLY`), named
+error types, and the cause→effect link.
 
 Output only the reframe. No "here's what I changed".
