@@ -22,6 +22,9 @@ Match the tool to *why* the answer failed:
 - **Reorganize** — content was fine, order buried it. Point first (BLUF),
   then support. Often this alone is enough.
 - **Cut jargon** — swap or define every term the reader wouldn't use themselves.
+  Apply STE-style rules: one verb per sentence, no nominalizations
+  ("perform a calculation" → "calculate"), use the simplest verb that fits.
+  Names, identifiers, flags, and error types stay verbatim.
 - **Analogy** — one fresh, everyday comparison for the hardest idea. No worn-out metaphors.
 - **Show it** — a small table, ASCII diagram, or before/after when structure or
   comparison is the point. A picture beats prose.
