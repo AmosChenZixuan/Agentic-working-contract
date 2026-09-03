@@ -48,8 +48,10 @@ that holds:
 - Can it be one obvious thing instead of a system? → make it that.
 
 Flag: speculative options and config, wrapper layers over a native feature,
-abstractions with a single caller, infrastructure built ahead of a real need,
-and guards for states that cannot occur.
+hand-rolled logic that reimplements something the stdlib, a platform feature,
+or an installed dependency already ships, abstractions with a single caller,
+infrastructure built ahead of a real need, and guards for states that cannot
+occur.
 
 **2. Complexity & duplication.** Flatten needless nesting and dead branches;
 consolidate duplicated or near-duplicated logic; delete dead code and unused
@@ -96,8 +98,7 @@ sole verifier of a behavior to save time.
    behavior-affecting flags. Re-check the keep guard: never drop trust-boundary
    validation, data-loss handling, error handling, security, accessibility, or a
    test that covers real behavior.
-4. **Report** in the template below. Value lands in what's cut, not the count —
-   a line tally is fine but optional.
+4. **Report** in the template below.
 
 ## Finding schema
 
@@ -107,7 +108,7 @@ Reviewers return findings in this shape, no prose:
 cut:           over-engineering | complexity | comments | tests
 location:      file:line  (a range or several sites is fine)
 remove:        <what to cut>
-why:           <why it earns nothing>
+why:           <why it earns nothing, one clause>
 behavior_risk: none | <the output, side effect, or contract it could change>
 ```
 
@@ -116,23 +117,32 @@ to sign-off.
 
 ## Output
 
-Keep it short — a scalpel, not an essay:
+Keep it short — a scalpel, not an essay. A safe cut or a keep is a claim, not
+an argument: state it in one line and move on. Spend sentences only where a
+human has to make a judgment call — that's Behavior-affecting, and nowhere
+else.
 
 ```
 ## Safe to cut
-- <remove @ file:line> — <cut + why it earns nothing>
+- <file:line>: <what> → <replacement, or "nothing">. <why it earns nothing, one clause>.
 
 ## Behavior-affecting (needs sign-off)
-- <remove @ file:line> — <cut + the behavior it would change>
+- <file:line>: <what looks cuttable> — <why it isn't safe: name the invariant,
+  the dependency, or the risk. Full reasoning belongs here, not above.>
 
 ## Keep (don't over-cut)
-<looks cuttable but genuinely protects correctness, safety, or behavior. Omit
-this section if nothing qualifies.>
+- <file:line>: <what> — <why it earns its place, one clause>. Omit this
+  section if nothing qualifies.
 
 ## Gaps
 <missing tests for real behavior or edge paths — the one place razor-code adds
 rather than removes — plus necessary-but-expensive tests whose cost should be
 cut without losing coverage. Omit if none.>
+
+net: -<N> lines cut, <M> flagged for sign-off.
 ```
+
+The `net:` line is always present, even at zero — it's the one number a
+reviewer can trust without reading the rest.
 
 If the code is already lean, say so and stop.
