@@ -52,6 +52,7 @@ Installable via the harness (`INSTALL.md`). Cross-agent.
 | `humanizer` | remove AI writing patterns |
 | `handoff` | compact the conversation into a handoff doc for another agent |
 | `teach` | teach a skill or concept across sessions, using the current dir as state |
+| `prototype` | throwaway prototype to sanity-check a state model/logic or explore a UI direction |
 | `ponytail` | flag & reduce over-engineering in diffs and repos |
 
 ---

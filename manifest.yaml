@@ -25,6 +25,8 @@ skills:
         description: compact the conversation into a handoff doc for another agent
       - name: teach
         description: teach a skill or concept across sessions, using the current dir as state
+      - name: prototype
+        description: throwaway prototype to sanity-check a state model/logic or explore a UI direction
   - install_guide: https://github.com/DietrichGebert/ponytail/blob/main/README.md
     provides:
       - name: ponytail
